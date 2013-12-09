@@ -219,5 +219,5 @@
 <h2>Advanced demo</h2>
 
 
-<h3>Go to project page to see this module in action: http://blacklabel.github.io/annotations/</h3>
+<div>Go to project page to see this module in action: http://blacklabel.github.io/annotations/</div>
 
