@@ -1,0 +1,40 @@
+{
+	"name": "Annotations",
+	"version": "1.0.0",
+	"title": "Annotations",
+	"author": {
+		"name": "Black Label",
+		"url": "http://www.blacklabel.pl/"
+	},
+	"licenses": [
+		{
+			"type": "Creative Commons Attribution (CC)",
+			"url": "https://github.com/blacklabel/annotations/blob/master/license.txt"
+		}
+	],
+	"dependencies": {
+		"highcharts": "3.0.7+"
+	},
+	"demo": [
+		"http://jsfiddle.net/"
+	],
+	"description": "Plugin that add annotations to Highcharts library.",
+	"keywords": [
+		"annotations"
+	],       
+	"maintainers": [
+		{
+			"name": "Sebastian Bochan",
+			"email": "sebastian2blacklabel.pl",
+			"url": "http://www.blacklabel.pl"
+		},{
+			"name": "Paweł Fus",
+			"email": "pawel@blacklabel.pl",
+			"url": "http://www.blacklabel.pl"
+		}
+	],
+	"homepage": "http://blacklabel.github.io/annotations/",	
+	"docs": "https://github.com/blacklabel/annotations/",	
+	"bugs": "https://github.com/blacklabel/annotations/issues",
+	"download": "https://github.com/blacklabel/annotations/archive/master.zip"
+}
