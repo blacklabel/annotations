@@ -22,7 +22,10 @@ ALIGN_FACTOR = {
 // Highcharts helper methods
 var inArray = HighchartsAdapter.inArray,
         merge = Highcharts.merge,
+<<<<<<< HEAD
         each = Highcharts.each,
+=======
+>>>>>>> master
         addEvent = Highcharts.addEvent;
 
 function defaultOptions(shapeType) {
@@ -100,12 +103,20 @@ function getTransform(t) {
 						return {
 							x: x,
 							y: y
+<<<<<<< HEAD
 						}
+=======
+						};
+>>>>>>> master
 				} else {
 						return {
 							x: UNDEFINED,
 							y: UNDEFINED
+<<<<<<< HEAD
 						}
+=======
+						};
+>>>>>>> master
 				}
 }
 
