@@ -82,9 +82,9 @@ $(function () {
 				var container = chart.container,
 						offsetX = chart.plotLeft - container.offsetLeft,
 						offsetY = chart.plotTop - container.offsetTop;
-			/* 	Highcharts.addEvent(container, 'mousedown', function (e) {
+				Highcharts.addEvent(container, 'mousedown', function (e) {
 					var isInside = chart.isInsidePlot(e.clientX - offsetX, e.pageY - offsetY);
-				}); */
+				}); 
 		});
 		
 		function chartLoad() {
