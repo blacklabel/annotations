@@ -6,6 +6,7 @@ $(function () {
 						borderRadius: 0,
 						renderTo: 'container',
 						backgroundColor: '#f7f7f7',
+						//zoomType: 'x',
 						events: {
 								load: chartLoad
 						}	
@@ -23,7 +24,7 @@ $(function () {
 						title: {
 								text: '<span style="">drag me anywhere <br> dblclick to remove</span>',
 								style: {
-										color: 'red',
+										color: 'red'
 								}
 						},
 						allowDragX: true,
@@ -34,12 +35,12 @@ $(function () {
 						title: 'drag me <br> horizontaly',
 						allowDragY: false,
 						allowDragX: true,
-						x: 507,
-						y: 195,
+						xValue: 3,
+						yValue: 10,
 						shape: {
 								type: 'path',
 								params: {
-										d: ['M', 0, -37, 'L', 0, 201],
+										d: ['M', 0, 0, 'L', 110, 0],
 										stroke: '#c55'
 								}
 						}
@@ -82,9 +83,9 @@ $(function () {
 						offsetX = chart.plotLeft - container.offsetLeft,
 						offsetY = chart.plotTop - container.offsetTop;
 				
-				Highcharts.addEvent(container, 'mousedown', function (e) {
+			/* 	Highcharts.addEvent(container, 'mousedown', function (e) {
 					var isInside = chart.isInsidePlot(e.clientX - offsetX, e.pageY - offsetY);
-				});
+				}); */
 		});
 		
 		function chartLoad() {
@@ -134,7 +135,7 @@ $(function () {
 								d: shape.d ? getPath(e) : null,
 								width: shape.width ? getWidth(e) : null,
 								height: shape.height ? getHeight(e) : null
-						}
+						};
 				}
 				
 				function drag(e) {
@@ -206,13 +207,13 @@ $(function () {
 						Highcharts.removeEvent(document, 'mousemove', step);
 						
 						// store annotation details
-						if(annotation)
+						if(annotation){
 							annotation.update({
 									shape: {
 											params: getParams(e)
 									}
 							});
-							
+						}
 						annotation = null;
 				}
 				
