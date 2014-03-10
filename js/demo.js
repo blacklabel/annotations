@@ -27,12 +27,16 @@ $(function () {
 										color: 'red'
 								}
 						},
+						anchorX: "left",
+						anchorY: "top",
 						allowDragX: true,
 						allowDragY: true,
 						x: 575,
 						y: 55
 				}, {
 						title: 'drag me <br> horizontaly',
+						anchorX: "left",
+						anchorY: "top",
 						allowDragY: false,
 						allowDragX: true,
 						xValue: 3,
@@ -48,7 +52,9 @@ $(function () {
 						title: 'on point <br> drag&drop <br> disabled',
 						linkedTo: 'high',
 						allowDragY: false,
-						allowDragX: false,                         
+						allowDragX: false,   
+						anchorX: "center",
+						anchorY: "center",                      
 						shape: {
 								type: 'circle',
 								params: {
@@ -60,6 +66,8 @@ $(function () {
 						x: 100,
 						y: 200,
 						title: 'drag me <br> verticaly',
+						anchorX: "left",
+						anchorY: "top",
 						allowDragY: true,
 						allowDragX: false,
 						shape: {
@@ -102,7 +110,6 @@ $(function () {
 									y = e.pageY - container.offsetTop,
 									dx = Math.abs(x - clickX),
 									dy = Math.abs(y - clickY);
-							console.log(x, y);
 							return parseInt(Math.sqrt(dx * dx + dy * dy), 10);
 						}
 						
@@ -157,7 +164,11 @@ $(function () {
 						if (!chart.isInsidePlot(clickX - chart.plotLeft, clickY - chart.plotTop)) {
 								return;
 						}
-						
+						if(strokeWidth == '') {
+							strokeWidth = 5;
+						} else if(typeof strokeWidth == 'string') {
+							strokeWidth = parseInt(strokeWidth, 10);
+						}
 						
 						if(shape == 'rect') {
 								x = 0;
@@ -167,7 +178,7 @@ $(function () {
 								radius = 1;
 						}
 						
-						chart.annotations.add({
+						chart.addAnnotation({
 								x: clickX,
 								y: clickY,
 								allowDragX: true,

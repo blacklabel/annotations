@@ -178,11 +178,11 @@
 </thead>
 <tbody>
 <tr>
-<td align="left">chart.annotations.add(options) </td>
+<td align="left">chart.addAnnotation(options) </td>
 <td align="left"> Add one annotation with given options</td>
 </tr>
 <tr>
-<td align="left">chart.annotations.redraw()     </td>
+<td align="left">chart.redrawAnnotations()     </td>
 <td align="left"> Redraw all annotations</td>
 </tr>
 <tr>

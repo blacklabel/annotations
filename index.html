@@ -354,11 +354,11 @@ sup {
 </thead>
 <tbody>
 <tr>
-<td align="left">chart.annotations.add(options) </td>
+<td align="left">chart.addAnnotation(options) </td>
 <td align="left"> Add one annotation with given options</td>
 </tr>
 <tr>
-<td align="left">chart.annotations.redraw()     </td>
+<td align="left">chart.redrawAnnotations()     </td>
 <td align="left"> Redraw all annotations</td>
 </tr>
 <tr>
@@ -401,9 +401,9 @@ sup {
 				<div class="form-header"> Add annotation: </div>
 				<p>
 						<label> Shape: </label> <br>
-						<input type="radio" name="type" value="circle" checked/>  <span for="circle"> circle </span> <br>
+						<input type="radio" name="type" value="path" checked/>  <span for="line"> line </span> 
+						<input type="radio" name="type" value="circle"/>  <span for="circle"> circle </span> <br>
 						<input type="radio" name="type" value="rect"/> 	<span for="square"> square </span>  <br>
-						<input type="radio" name="type" value="path"/>  <span for="line"> line </span> 
 				</p>
 				<p>
 						<label for="fill"> Fill color: </label>
