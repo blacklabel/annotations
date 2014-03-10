@@ -136,12 +136,21 @@ $(function () {
 							return parseInt(dy, 10) + 1;
 						}
 						var shape = annotation.shape;
-						return {
-								r: shape.r ? getRadius(e) : null,
-								d: shape.d ? getPath(e) : null,
-								width: shape.width ? getWidth(e) : null,
-								height: shape.height ? getHeight(e) : null
-						};
+						
+						var newShape = {};
+						if(shape.r) {
+								 newShape.r = getRadius(e);
+						}
+						if(shape.d) {
+								 newShape.d = getPath(e);
+						}
+						if(shape.width) {
+								 newShape.width = getWidth(e);
+						}
+						if(shape.height) {
+								 newShape.height = getHeight(e);
+						}
+						return newShape;
 				}
 				
 				function drag(e) {
@@ -189,7 +198,7 @@ $(function () {
 								shape: {
 										type: shape,
 										params: {
-												r: shape == 'circle' ? 1 : null,
+												r: shape == 'circle' ? 1 : 0,
 												d: shape == 'path' ? ['M', 0, 0, 'L', 1, 1] : null,
 												x: x,
 												y: y,
