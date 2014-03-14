@@ -17,8 +17,8 @@ $(function () {
 						},
 						useHTML: true,
 						x: -27,
-						y: 0,
-						text: '<span class="chart-title">Drag and drop on a chart to add annotation </span>'	
+						y: 8,
+            text: '<span class="chart-title"> Drag and drop on a chart to add annotation  <span class="chart-href"> <a href="http://www.blacklabel.pl/highcharts" target="_blank"> Black Label </a> </span> <span class="chart-subtitle">plugin by </span></span>'
 				},
 				annotations: [{
 						title: {
@@ -31,7 +31,7 @@ $(function () {
 						anchorY: "top",
 						allowDragX: true,
 						allowDragY: true,
-						x: 575,
+						x: 515,
 						y: 55
 				}, {
 						title: 'drag me <br> horizontaly',
