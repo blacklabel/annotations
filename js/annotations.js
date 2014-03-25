@@ -70,19 +70,21 @@ function defined(obj) {
 
 function translatePath(d, xAxis, yAxis, xOffset, yOffset) {
         var len = d.length,
-                i = 0;
+                i = 0,
+                path = [];
 
         while (i < len) {
                 if (typeof d[i] === 'number' && typeof d[i + 1] === 'number') {
-                        d[i] = xAxis.toPixels(d[i]) - xOffset;
-                        d[i + 1] = yAxis.toPixels(d[i + 1]) - yOffset;
+                        path[i] = xAxis.toPixels(d[i]) - xOffset;
+                        path[i + 1] = yAxis.toPixels(d[i + 1]) - yOffset;
                         i += 2;
                 } else {
+                				path[i] = d[i];
                         i += 1;
                 }
         }
 
-        return d;
+        return path;
 }
 // Define annotation prototype
 var Annotation = function () {
@@ -248,7 +250,7 @@ Annotation.prototype = {
                                 }
 
                                 if (options.shape.type === 'path') {
-                                        translatePath(shapeParams.d, xAxis, yAxis, x, y);
+                                        shapeParams.d = translatePath(shapeParams.d, xAxis, yAxis, x, y);
                                 }
                         }
 
