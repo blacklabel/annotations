@@ -35,7 +35,7 @@ function defaultOptions(shapeType) {
                         params: {
                                 stroke: "#000000",
                                 fill: "rgba(0,0,0,0)",
-                                strokeWidth: 2
+                                'stroke-width': 2
                         }
                 }
         };
@@ -86,6 +86,28 @@ function translatePath(d, xAxis, yAxis, xOffset, yOffset) {
 
         return path;
 }
+
+function createGroup(chart, i, clipPath){
+		var group = chart.renderer.g("annotations-group-" + i);
+		group.attr({
+				zIndex: 7
+		});
+		group.add();
+		group.clip(clipPath);
+		return group;
+}
+
+function createClipPath(chart, y){
+		var clipBox = {
+				x: y.left,
+				y: y.top,
+				width: y.width,
+				height: y.height
+		}
+				
+		return chart.renderer.clipRect(clipBox);   
+}
+
 // Define annotation prototype
 var Annotation = function () {
         this.init.apply(this, arguments);
@@ -130,26 +152,56 @@ Annotation.prototype = {
                 }
 
                 if (!title && titleOptions) {
-												title = annotation.title = renderer.label(titleOptions);
-												title.add(group);
+					title = annotation.title = renderer.label(titleOptions);
+					title.add(group);
                 }
                 if((allowDragX || allowDragY) && !hasEvents) {
-												$(group.element).on('mousedown', function(e){
-														annotation.events.storeAnnotation(e, annotation, chart);
-												});
-												addEvent(document, 'mouseup', function(e){
-														annotation.events.releaseAnnotation(e, chart);
-												});
-                				group.on('dblclick', function(e){
-														annotation.events.destroyAnnotation(e, annotation, chart);
-												});
-												this.hasEvents = true;
+					$(group.element).on('mousedown', function(e){
+							annotation.events.storeAnnotation(e, annotation, chart);
+					});
+					addEvent(document, 'mouseup', function(e){
+							annotation.events.releaseAnnotation(e, chart);
+					});
+					group.on('dblclick', function(e){
+						if(annotation.options.linkedAnnotations) {
+							var items = chart.annotations.allItems,
+								iLen = items.length - 1,
+								id = annotation.options.linkedAnnotations,
+								i = 0;
+							
+							for(; iLen >= 0; iLen --){
+								var ann = items[iLen];
+								if(ann.options.linkedAnnotations === id) {
+									ann.events.destroyAnnotation(e, ann, chart);
+								}	
+							}
+						} else {
+							annotation.events.destroyAnnotation(e, annotation, chart);
+						}
+					});
+					this.hasEvents = true;
                 } else if(!hasEvents){
-                				//group.on('dblclick', destroyAnnotation);
-												//this.hasEvents = true;
+					group.on('dblclick', function(e){
+						if(annotation.options.linkedAnnotations) {
+							var items = chart.annotations.allItems,
+								iLen = items.length - 1,
+								id = annotation.options.linkedAnnotations,
+								i = 0;
+							
+							for(; iLen >= 0; iLen --){
+								var ann = items[iLen];
+								if(ann.options.linkedAnnotations === id) {
+									ann.events.destroyAnnotation(e, ann, chart);
+								}	
+							}
+						} else {
+							annotation.events.destroyAnnotation(e, annotation, chart);
+						}
+					});
+					this.hasEvents = true;
                 }
                 
-                group.add(chart.annotations.group);
+                group.add(chart.annotations.groups[options.yAxis]);
                 
 
                 // link annotations to point or series
@@ -207,7 +259,8 @@ Annotation.prototype = {
 
 
                 // Based on given options find annotation pixel position
-                x = (defined(options.xValue) ? xAxis.toPixels(options.xValue + xAxis.minPointOffset) - xAxis.minPixelPadding : options.x);
+                // what is minPointOffset? Doesn't work in 4.0+
+                x = (defined(options.xValue) ? xAxis.toPixels(options.xValue /* + xAxis.minPointOffset */) : options.x);
                 y = defined(options.yValue) ? yAxis.toPixels(options.yValue) : options.y;
 
                 if (isNaN(x) || isNaN(y) || !isNumber(x) || !isNumber(y)) {
@@ -216,17 +269,17 @@ Annotation.prototype = {
 
 
                 if (title) {
-												var attrs = options.title;
-												if(isOldIE) {
-														title.attr({
-															text: attrs.text
-														});
-												} else {
-														title.attr(attrs);
-												}
-												title.css(options.title.style);
-												
-												resetBBox = true;
+					var attrs = options.title;
+					if(isOldIE) {
+							title.attr({
+								text: attrs.text
+							});
+					} else {
+							title.attr(attrs);
+					}
+					title.css(options.title.style);
+					
+					resetBBox = true;
                 }
 
                 if (shape) {
@@ -252,6 +305,12 @@ Annotation.prototype = {
                                 if (options.shape.type === 'path') {
                                         shapeParams.d = translatePath(shapeParams.d, xAxis, yAxis, x, y);
                                 }
+                        }
+                        
+                        if(defined(options.yValueEnd) && defined(options.xValueEnd) && options.shape.d){
+                        	shapeParams.d = shapeParams.d || options.shape.d;
+                        	shapeParams.d[4] = xAxis.toPixels(options.xValueEnd) - xAxis.toPixels(options.xValue);
+                        	shapeParams.d[5] = yAxis.toPixels(options.yValueEnd) - yAxis.toPixels(options.yValue);
                         }
 
                         // move the center of the circle to shape x/y
@@ -328,7 +387,7 @@ Annotation.prototype = {
                         }
                 });
 
-                annotation.group = annotation.title = annotation.shape = annotation.chart = annotation.options = null;
+                annotation.group = annotation.title = annotation.shape = annotation.chart = annotation.options = annotation.hasEvents = null;
         },
 
         /*
@@ -484,8 +543,33 @@ extend(Chart.prototype, {
 				 * Redraw all annotations, method used in chart events
 				 */
 				redrawAnnotations: function () {
-								each(this.annotations.allItems, function (annotation) {
-												annotation.redraw();
+								var chart = this,
+									yAxes = chart.yAxis,
+									yLen = yAxes.length,
+									ann = chart.annotations,
+									i = 0;
+
+								for(; i < yLen; i++){
+									var y = yAxes[i],
+										clip = ann.clipPaths[i];
+									
+									if(clip) {
+										clip.attr({
+											x: y.left,
+											y: y.top,
+											width: y.width,
+											height: y.height
+										}); 
+									} else {
+										var clipPath = createClipPath(chart, y);
+										ann.clipPaths.push(clipPath);
+										ann.groups.push(createGroup(chart, i, clipPath));
+									}
+										
+								}		
+										
+								each(chart.annotations.allItems, function (annotation) {
+										annotation.redraw();
 								});
 				}
 });
@@ -494,22 +578,22 @@ extend(Chart.prototype, {
 // Initialize on chart load
 Chart.prototype.callbacks.push(function (chart) {
         var options = chart.options.annotations,
-        		clipPath,
+        	yAxes = chart.yAxis,
+        	yLen = yAxes.length,
+			clipPaths = [],
+			clipPath,
+            groups = [],
             group,
-						clipBox = {
-								x: chart.plotLeft,
-								y: chart.plotTop,
-								width: chart.plotWidth,
-								height: chart.plotHeight
-						};
+            i = 0,
+			clipBox;
 
-        clipPath = chart.renderer.clipRect(clipBox);   
-        group = chart.renderer.g("annotations");
-        group.attr({
-                zIndex: 7
-        });
-        group.add();
-        group.clip(clipPath);
+		for(; i < yLen; i++){
+			var y = yAxes[i];
+			var c = createClipPath(chart, y);
+			clipPaths.push(c);
+			groups.push(createGroup(chart, i, c));
+		}
+			
 
         if(!chart.annotations) chart.annotations = {};
         
@@ -521,10 +605,10 @@ Chart.prototype.callbacks.push(function (chart) {
         chart.annotations.chart = chart;
 
         // link annotations group element to the chart
-        chart.annotations.group = group;
+        chart.annotations.groups = groups;
         
         // add clip path to annotations
-        chart.annotations.clipPath = clipPath;
+        chart.annotations.clipPaths = clipPaths;
 
         if (isArray(options) && options.length > 0) {
                 chart.addAnnotation(chart.options.annotations);
