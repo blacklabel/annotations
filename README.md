@@ -58,6 +58,10 @@
 <td align="left"> Annotation position defined using axis values</td>
 </tr>
 <tr>
+<td align="left">xValueEnd<br>yValueEnd                          </td>
+<td align="left"> Path only. Instead of defining path, set these values to make annotation scalable</td>
+</tr>
+<tr>
 <td align="left">xAxis<br>yAxis                            </td>
 <td align="left"> Axis index, default to 0</td>
 </tr>
@@ -72,6 +76,10 @@
 <tr>
 <td align="left">linkedTo                                  </td>
 <td align="left"> Link annotation to point or series using it's id</td>
+</tr>
+<tr>
+<td align="left">linkedAnnotations                                  </td>
+<td align="left"> Annotations with the same value/id will be removed together after double click</td>
 </tr>
 <tr>
 <td align="left">title                                     </td>
