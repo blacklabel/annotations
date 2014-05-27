@@ -203,14 +203,11 @@ Annotation.prototype = {
                 
                 group.add(chart.annotations.groups[options.yAxis]);
                 
-
                 // link annotations to point or series
                 annotation.linkObjects();
-
                 if (redraw !== false) {
                         annotation.redraw();
                 }
-                
         },
 
         /*
@@ -284,7 +281,6 @@ Annotation.prototype = {
 
                 if (shape) {
                         shapeParams = extend({}, options.shape.params);
-
                         if (options.units === 'values') {
                                 for (param in shapeParams) {
                                         if (inArray(param, ['width', 'x']) > -1) {

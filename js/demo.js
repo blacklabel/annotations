@@ -135,7 +135,7 @@ $(function () {
 							
 							return parseInt(dy, 10) + 1;
 						}
-						var shape = annotation.shape;
+						var shape = annotation.options.shape.params;
 						
 						var newShape = {};
 						if(shape.r) {
