@@ -37,6 +37,7 @@ body {
     width: auto;
     margin-left: 55px;
 }
+.highcharts-title { left:5px!important; } 
 .chart-title {
     background-color: #3d3d3d;
     color: #fff;
