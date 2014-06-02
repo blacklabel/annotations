@@ -7,7 +7,7 @@
   <title>Highcharts Demo - annotations demo</title>
   
   <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
-	<script src="http://github.highcharts.com/highcharts.js"></script>
+	<script src="http://code.highcharts.com/stock/highstock.js"></script>
   <script src="./js/annotations.js"></script>
   <script src="./js/demo.js"></script>
   
@@ -74,6 +74,10 @@
 <tr>
 <td align="left">xValue<br>yValue                          </td>
 <td align="left"> Annotation position defined using axis values</td>
+</tr>
+<tr>
+<td align="left">xValueEnd<br>yValueEnd                          </td>
+<td align="left"> Path only. Instead of defining path, set these values to make annotation scalable</td>
 </tr>
 <tr>
 <td align="left">xAxis<br>yAxis                            </td>
@@ -232,39 +236,78 @@
 </tbody>
 </table>
 
+<h3>Annotation options</h3>
+
+<table>
+<thead>
+<tr>
+<th align="left">Property                   </th>
+<th align="left"> Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"> enabledButtons </td>
+<td align="left"> Enable or disable buttons for drawing annotations. <br>
+Selected button prevents from zooming and panning to draw annotation. </td>
+</tr>
+<tr>
+<td align="left"> buttons      </td>
+<td align="left"> Array of buttons. For example: 
+<pre>{
+	annotationEvents: {
+		step: callback, // to be called during mouse drag for new annotation
+		stop: callback  // to be called after mouse up / release
+	},
+	annotation: { // standard annotation options, used for new annotation
+		anchorX: 'left',
+		anchorY: 'top',
+		xAxis: 0,
+		yAxis: 0,
+		shape: {
+			type: 'path',
+			params: {
+				d: ['M', 0, 0, 'L', 100, 100 ]
+			}
+		}
+	},
+	symbol: { // button symbol options
+		shape: 'rect', // shape, taken from Highcharts.symbols
+		size: 12,
+		style: {
+			'stroke-width':  2,
+			'stroke': 'black',
+			fill: 'red',
+			zIndex: 121
+		}
+	},
+	style: { // buton style itself
+		fill: 'black',
+		stroke: 'blue',
+		strokeWidth: 2,
+	},
+	size: 12, // buton size
+	states: { // states for button 
+		selected: {
+			fill: '#9BD'
+		},
+		hover: {
+			fill: '#9BD'
+		}
+	}
+}</pre></td>
+</tr>
+</tbody>
+</table>
+
 
 
 <h2>Advanced demo</h2>
 
 
-<h3>Use simple form to setup annotation object (demo.js)</h3>
+<h3>Add annotation via buttons</h3>
 <div style="margin: 10px 0px 50px 0px;width: 854px; float: left;">
-		<div class="form">
-				<div class="form-header"> Add annotation </div>
-				<p>
-						<label> Shape: </label> <br>
-						<input type="radio" name="type" value="path" checked/>  <span for="line"> line </span> 
-						<input type="radio" name="type" value="circle"/>  <span for="circle"> circle </span> <br>
-						<input type="radio" name="type" value="rect"/> 	<span for="square"> square </span>  <br>
-				</p>
-				<p>
-						<label for="fill"> Fill color: </label>
-						<input type="text" id="fill" value="#AB3445"/>
-				</p>
-				<p>
-						<label for="stroke"> Stroke color: </label>
-						<input type="text" id="stroke" value="red"/>
-				</p>
-				<p>
-						<label for="strokeWidth"> Stroke width: </label>
-						<input type="range" id="strokeWidth" step="1" min="0" max="15"/>
-				</p>
-				<p>
-						<label for="title"> Title: </label>
-						<input id="title" type="text" value="Annotation title <br> with line break" /> 
-				</p>
-		</div>
-		<div id="container" style="float: left; height: 342px; width: 640px">
+		<div id="container" style="float: left; height: 542px; width: 800px">
 		</div>
 </div>
 </body>

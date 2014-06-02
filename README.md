@@ -223,6 +223,69 @@
 </table>
 
 
+<h3>Annotation options</h3>
+
+<table>
+<thead>
+<tr>
+<th align="left">Property                   </th>
+<th align="left"> Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"> enabledButtons </td>
+<td align="left"> Enable or disable buttons for drawing annotations </td>
+</tr>
+<tr>
+<td align="left"> buttons      </td>
+<td align="left"> Array of buttons. For example: 
+<pre>{
+	annotationEvents: {
+		step: callback, // to be called during mouse drag for new annotation
+		stop: callback  // to be called after mouse up / release
+	},
+	annotation: { // standard annotation options, used for new annotation
+		anchorX: 'left',
+		anchorY: 'top',
+		xAxis: 0,
+		yAxis: 0,
+		shape: {
+			type: 'path',
+			params: {
+				d: ['M', 0, 0, 'L', 100, 100]
+			}
+		}
+	},
+	symbol: { // button symbol options
+		shape: 'rect', // shape, taken from Highcharts.symbols
+		size: 12,
+		style: {
+			'stroke-width':  2,
+			'stroke': 'black',
+			fill: 'red',
+			zIndex: 121
+		}
+	},
+	style: { // buton style itself
+		fill: 'black',
+		stroke: 'blue',
+		strokeWidth: 2,
+	},
+	size: 12, // buton size
+	states: { // states for button 
+		selected: {
+			fill: '#9BD'
+		},
+		hover: {
+			fill: '#9BD'
+		}
+	}
+}</pre></td>
+</tr>
+</tbody>
+</table>
+
 
 <h2>Advanced demo</h2>
 

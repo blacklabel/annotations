@@ -2,11 +2,12 @@
 
 var UNDEFINED,
         ALIGN_FACTOR,
-        Chart = Highcharts.Chart,
-        extend = Highcharts.extend,
-        each = Highcharts.each;
+        H = Highcharts,
+        Chart = H.Chart,
+        extend = H.extend,
+        each = H.each;
 
-Highcharts.ALLOWED_SHAPES = ["path", "rect", "circle"];
+H.ALLOWED_SHAPES = ["path", "rect", "circle"];
 
 ALIGN_FACTOR = {
         top: 0,
@@ -18,42 +19,229 @@ ALIGN_FACTOR = {
 };
 
 
+H.SVGRenderer.prototype.symbols.line = function(x,y,w,h){
+	var p = 2;
+	return [
+		'M', x + p, y + p, 'L', x + w - p, y + h - p
+	];
+};
+// VML fallback
+if(H.VMLRenderer) {
+	H.VMLRenderer.prototype.symbols.line = H.SVGRenderer.prototype.symbols.line;
+}
+
+// when drawing annotation, don't zoom/select place
+H.wrap(H.Pointer.prototype, 'drag', function(c, e) {
+	if(!this.chart.annotations || this.chart.annotations.allowZoom){
+		c.call(this, e);
+	}
+});
+
 // Highcharts helper methods
 var inArray = HighchartsAdapter.inArray,
-        merge = Highcharts.merge,
-        addEvent = Highcharts.addEvent,
-        isOldIE = Highcharts.VMLRenderer ? true : false;
+        merge = H.merge,
+        addEvent = H.addEvent,
+        isOldIE = H.VMLRenderer ? true : false;
 
+// utils for buttons   
+var utils = {
+	getRadius: function(e) {
+		var ann = this,
+			chart = ann.chart, 
+			offset = $(chart.container).offset(),
+			x = e.pageX - offset.left,
+			y = e.pageY - offset.top,
+			xAxis = chart.xAxis[ann.options.xAxis],
+			yAxis = chart.yAxis[ann.options.yAxis],
+			dx = Math.abs(x - xAxis.toPixels(ann.options.xValue)),
+			dy = Math.abs(y - yAxis.toPixels(ann.options.yValue));
+			radius = parseInt(Math.sqrt(dx * dx + dy * dy), 10);
+		ann.shape.attr({
+			r: radius	
+		})
+		return radius;
+	},
+	getRadiusAndUpdate:	function(e) {
+		var r = utils.getRadius.call(this, e);
+		this.update({
+			shape: {
+				r: r	
+			}
+		});
+	},
+	getPath: function(e) {
+		var ann = this,
+			chart = ann.chart, 
+			offset = $(chart.container).offset(),
+			x = e.pageX - offset.left,
+			y = e.pageY - offset.top,
+			xAxis = chart.xAxis[ann.options.xAxis],
+			yAxis = chart.yAxis[ann.options.yAxis],
+			dx = x - xAxis.toPixels(ann.options.xValue),
+			dy = y - yAxis.toPixels(ann.options.yValue);
+			
+		var path = ["M", 0, 0, 'L', parseInt(dx, 10), parseInt(dy, 10)];	
+		ann.shape.attr({
+			d: path	
+		})
+			
+		return path;
+	},
+	getPathAndUpdate: function(e) {
+		var ann = this,
+			chart = ann.chart, 
+			path = utils.getPath.call(ann, e),
+			xAxis = chart.xAxis[ann.options.xAxis],
+			yAxis = chart.yAxis[ann.options.yAxis],
+			x = xAxis.toValue(path[4] + xAxis.toPixels(ann.options.xValue)) ,
+			y = yAxis.toValue(path[5] + yAxis.toPixels(ann.options.yValue)) ;
+			
+		this.update({
+			xValueEnd: x,
+			yValueEnd: y,
+			shape: {
+				d: path	
+			}
+		});
+	},
+	getRect: function(e) {
+		var ann = this,
+			chart = ann.chart, 
+			offset = $(chart.container).offset(),
+			x = e.pageX - offset.left,
+			y = e.pageY - offset.top,
+			xAxis = chart.xAxis[ann.options.xAxis],
+			yAxis = chart.yAxis[ann.options.yAxis],
+			sx = xAxis.toPixels(ann.options.xValue),
+			sy = yAxis.toPixels(ann.options.yValue),
+			dx = x - sx,
+			dy = y - sy,
+			w = Math.round(dx) + 1,
+			h = Math.round(dy) + 1,
+			ret = {};
+			
+		ret.x = w < 0 ? w : 0;
+		ret.width = Math.abs(w);
+		ret.y = h < 0 ? h : 0;
+		ret.height = Math.abs(h);
+					
+		ann.shape.attr({
+			x: ret.x,
+			y: ret.y,
+			width: ret.width,
+			height: ret.height
+		})
+		return ret;
+	},
+	getRectAndUpdate: function(e) {
+		var rect = utils.getRect.call(this, e);
+		this.update({
+			shape: rect
+		});
+	}
+}
+        
 function defaultOptions(shapeType) {
         var shapeOptions,
             options;
 
         options = {
-                xAxis: 0,
-                yAxis: 0,
-                shape: {
-                        params: {
-                                stroke: "#000000",
-                                fill: "rgba(0,0,0,0)",
-                                'stroke-width': 2
-                        }
-                }
+			xAxis: 0,
+			yAxis: 0,
+			shape: {
+				params: {
+					stroke: "#000000",
+					fill: "rgba(0,0,0,0)",
+					'stroke-width': 2
+				}
+			}
         };
 
         shapeOptions = {
-                circle: {
-                        params: {
-                                x: 0,
-                                y: 0
-                        }
-                }
+			circle: {
+				params: {                 
+					x: 0,
+					y: 0
+				}
+			}
         };
 
         if (shapeOptions[shapeType]) {
-                options.shape = merge(options.shape, shapeOptions[shapeType]);
+			options.shape = merge(options.shape, shapeOptions[shapeType]);
         }
 
         return options;
+}
+
+
+function defatultMainOptions(){
+	var buttons = [],
+		shapes = ['circle', 'line', 'square'],
+		types = ['circle', 'path', 'rect'],
+		params = [{
+			r: 5,
+			fill: 'rgba(255,0,0,0.4)',
+			stroke: 'black'
+		}, {
+			d: ['M', 0, 0, 'L', 10, 10],
+			fill: 'rgba(255,0,0,0.4)',
+			stroke: 'black'
+		}, {
+			width: 10,
+			height: 10,
+			fill: 'rgba(255,0,0,0.4)',
+			stroke: 'black'
+		}],
+		steps = [utils.getRadius, utils.getPath, utils.getRect],
+		stops = [utils.getRadiusAndUpdate, utils.getPathAndUpdate, utils.getRectAndUpdate];
+		
+	each(shapes, function(s, i) {
+		buttons.push({
+			annotationEvents: {
+				step: steps[i],
+				stop: stops[i]
+			},
+			annotation: {
+				anchorX: 'left',
+				anchorY: 'top',
+				xAxis: 0,
+				yAxis: 0,
+				shape: {
+					type: types[i],
+					params: params[i]
+				}
+			},
+			symbol: {
+				shape: s,
+				size: 12,
+				style: {
+					'stroke-width':  2,
+					'stroke': 'black',
+					fill: 'red',
+					zIndex: 121
+				}
+			},
+			style: {
+				fill: 'black',
+				stroke: 'blue',
+				strokeWidth: 2,
+			},
+			size: 12,
+			states: {
+				selected: {
+					fill: '#9BD'
+				},
+				hover: {
+					fill: '#9BD'
+				}
+			}
+		});
+	});
+		
+	return {
+		enabledButtons: true,
+		buttons: buttons
+	}
 }
 
 function isArray(obj) {
@@ -106,6 +294,107 @@ function createClipPath(chart, y){
 		}
 				
 		return chart.renderer.clipRect(clipBox);   
+}
+
+function attachEvents(chart) {
+	function drag(e) {
+		var offset = $(container).offset(),
+			clickX = e.pageX - offset.left,
+			clickY = e.pageY - offset.top;
+		
+		if (!chart.isInsidePlot(clickX - chart.plotLeft, clickY - chart.plotTop) || chart.annotations.allowZoom) {
+			return;
+		}
+		
+		var xAxis = chart.xAxis[0],
+			yAxis = chart.yAxis[0],
+			selected = chart.annotations.selected;
+		
+		var options = merge(chart.annotations.options.buttons[selected].annotation, {
+			xValue: xAxis.toValue(clickX),
+			yValue: yAxis.toValue(clickY),
+			allowDragX: true,
+			allowDragY: true
+		});
+		
+		chart.addAnnotation(options);
+		
+		chart.drawAnnotation = chart.annotations.allItems[chart.annotations.allItems.length - 1];
+		Highcharts.addEvent(document, 'mousemove', step);
+	}
+	
+	function step(e) {
+			var selected = chart.annotations.selected;
+			chart.annotations.options.buttons[selected].annotationEvents.step.call(chart.drawAnnotation, e);
+	}
+	
+	function drop(e) {
+			Highcharts.removeEvent(document, 'mousemove', step);
+			
+			// store annotation details
+			if(chart.drawAnnotation){
+				var selected = chart.annotations.selected;
+				chart.annotations.options.buttons[selected].annotationEvents.stop.call(chart.drawAnnotation, e);
+			}
+			chart.drawAnnotation = null;
+	}
+	Highcharts.addEvent(container, 'mousedown', drag);
+	Highcharts.addEvent(document, 'mouseup', drop);	
+}
+
+function renderButtons(chart) {
+	var buttons = chart.annotations.options.buttons;
+	
+	chart.annotations.buttons = chart.annotations.buttons || [];
+	each(buttons, function(button, i) {
+		chart.annotations.buttons.push(renderButton(chart, button, i));
+	});
+}
+
+function renderButton(chart, button, i) {
+	var xOffset = chart.rangeSelector ? chart.rangeSelector.inputGroup.offset : 0;
+		renderer = chart.renderer,
+		symbol = button.symbol,
+		offset = 30,
+		symbolSize = symbol.size,
+		buttonSize = button.size,
+		x = chart.plotWidth + chart.plotLeft - ((i+1) * offset) - xOffset,
+		y = chart.plotTop - 23 - buttonSize,
+		callback = button.events && button.events.click ? button.events.click : getButtonCallback(i, chart),
+		selected = button.states.selected,
+		hovered = button.states.hover;
+		
+		var button = renderer.button('', x, y, callback, {}, hovered, selected).attr({ width: buttonSize, height: buttonSize });
+		
+		var s = renderer.symbol(
+			symbol.shape,
+			buttonSize  - symbolSize /2,
+			buttonSize  - symbolSize /2,
+			symbolSize,
+			symbolSize
+		).attr(symbol.style).add(button);
+	
+	button.attr(button.style).add();
+	
+	return [button, s];
+}
+
+function getButtonCallback(index, chart) {
+	return function() {
+		self = chart.annotations.buttons[index][0];
+		if(self.state == 2) {
+			chart.annotations.selected = -1;
+			chart.annotations.allowZoom = true;
+			self.setState(0);
+		} else {
+			if(chart.annotations.selected >= 0) {
+				chart.annotations.buttons[chart.annotations.selected][0].setState(0);
+			}
+			chart.annotations.allowZoom = false;
+			chart.annotations.selected = index;
+			self.setState(2);
+		}
+	}	
 }
 
 // Define annotation prototype
@@ -179,7 +468,6 @@ Annotation.prototype = {
 							annotation.events.destroyAnnotation(e, annotation, chart);
 						}
 					});
-					this.hasEvents = true;
                 } else if(!hasEvents){
 					group.on('dblclick', function(e){
 						if(annotation.options.linkedAnnotations) {
@@ -198,8 +486,8 @@ Annotation.prototype = {
 							annotation.events.destroyAnnotation(e, annotation, chart);
 						}
 					});
-					this.hasEvents = true;
                 }
+				this.hasEvents = true;
                 
                 group.add(chart.annotations.groups[options.yAxis]);
                 
@@ -413,100 +701,108 @@ Annotation.prototype = {
                 }
         },
         events: {
-        	      destroyAnnotation: function(event, annotation) {
+        	    destroyAnnotation: function(event, annotation) {
                 	annotation.destroy();	
                 },
                 translateAnnotation: function(event, chart){
                 	event.stopPropagation();
                 	event.preventDefault();
                 	var container = chart.container;
-									if(chart.activeAnnotation) {
-										var clickX = event.pageX - container.offsetLeft,
-												clickY = event.pageY - container.offsetTop;		
-												
-										if (!chart.isInsidePlot(clickX - chart.plotLeft, clickY - chart.plotTop)) {
-											return;
-										}		
-										var note = chart.activeAnnotation;
-												
-										var x = note.options.allowDragX ? event.pageX - note.startX + note.group.translateX : note.group.translateX,
-												y = note.options.allowDragY ? event.pageY - note.startY + note.group.translateY : note.group.translateY;
-									
-										note.transX = x;
-										note.transY = y;
-										note.group.attr({
-											transform: 'translate(' + x + ',' + y + ')'
-										}); 
-									}
-								},
+					if(chart.activeAnnotation) {
+						var offset = $(container).offset(),
+							clickX = event.pageX - offset.left,
+							clickY = event.pageY - offset.top;		
+								
+						if (!chart.isInsidePlot(clickX - chart.plotLeft, clickY - chart.plotTop)) {
+							return;
+						}		
+						var note = chart.activeAnnotation;
+								
+						var x = note.options.allowDragX ? event.pageX - note.startX + note.group.translateX : note.group.translateX,
+							y = note.options.allowDragY ? event.pageY - note.startY + note.group.translateY : note.group.translateY;
+					
+						note.transX = x;
+						note.transY = y;
+						note.group.attr({
+							transform: 'translate(' + x + ',' + y + ')'
+						}); 
+					}
+				},
                 storeAnnotation: function(event, annotation, chart) {
-										if(!chart.annotationDraging) {
-											event.stopPropagation();
-											event.preventDefault();
-										}
-                		if((!isOldIE && event.button === 0) || (isOldIE && event.button === 1)) {
-											var posX = event.pageX,
-													posY = event.pageY;
-											chart.activeAnnotation = annotation;
-											chart.activeAnnotation.startX = posX;
-											chart.activeAnnotation.startY = posY;
-											chart.activeAnnotation.transX = 0; 
-											chart.activeAnnotation.transY = 0; 
-											//translateAnnotation(event);
-											addEvent(document, 'mousemove', function(e){
-													annotation.events.translateAnnotation(e, chart);
-											});
-											//addEvent(chart.container, 'mouseleave', releaseAnnotation); TO BE OR NOT TO BE?
-										}
-										
+					if(!chart.annotationDraging) {
+						event.stopPropagation();
+						event.preventDefault();
+					}
+					if((!isOldIE && event.button === 0) || (isOldIE && event.button === 1)) {
+						var posX = event.pageX,
+								posY = event.pageY;
+						chart.activeAnnotation = annotation;
+						chart.activeAnnotation.startX = posX;
+						chart.activeAnnotation.startY = posY;
+						chart.activeAnnotation.transX = 0; 
+						chart.activeAnnotation.transY = 0; 
+						//translateAnnotation(event);
+						addEvent(document, 'mousemove', function(e){
+								annotation.events.translateAnnotation(e, chart);
+						});
+						//addEvent(chart.container, 'mouseleave', releaseAnnotation); TO BE OR NOT TO BE?
+					}
                 },
                 releaseAnnotation: function(event, chart){
-									event.stopPropagation();
-									event.preventDefault();
-									if(chart.activeAnnotation && (chart.activeAnnotation.transX !== 0 || chart.activeAnnotation.transY !== 0)) {
-										var note = chart.activeAnnotation,
-												x = note.transX,
-												y = note.transY,
-												options = note.options, 
-												xVal = options.xValue,
-												yVal = options.yValue,
-												allowDragX = options.allowDragX,
-												allowDragY = options.allowDragY,
-												xAxis = note.chart.xAxis[note.options.xAxis],
-												yAxis = note.chart.yAxis[note.options.yAxis],
-												newX = xAxis.toValue(x),
-												newY = yAxis.toValue(y);
-										
-										if(x !== 0 || y !==0){
-											if(allowDragX && allowDragY){
-												note.update({
-													xValue: defined(xVal) ? newX : null,
-													yValue: defined(yVal) ? newY : null,
-													x: defined(xVal) ? null : x,
-													y: defined(yVal) ? null : y
-												}, false);
-											} else if(allowDragX){
-												note.update({
-													xValue: defined(xVal) ? newX : null,
-													yValue: defined(yVal) ? yVal : null,
-													x: defined(xVal) ? null : x,
-													y: defined(yVal) ? null : note.options.y
-												}, false);
-											} else if(allowDragY){
-												note.update({
-													xValue: defined(xVal) ? xVal : null,
-													yValue: defined(yVal) ? newY : null,
-													x: defined(xVal) ? null : note.options.x,
-													y: defined(yVal) ? null : y
-												}, false);
-											}
-										}
-										chart.activeAnnotation = null;
-										chart.redraw(false);
-									} else {
-										chart.activeAnnotation = null;
-									}
-								}
+					event.stopPropagation();
+					event.preventDefault();
+					if(chart.activeAnnotation && (chart.activeAnnotation.transX !== 0 || chart.activeAnnotation.transY !== 0)) {
+						var note = chart.activeAnnotation,
+							x = note.transX,
+							y = note.transY,
+							options = note.options, 
+							xVal = options.xValue,
+							yVal = options.yValue,
+							xValEnd = options.xValueEnd,
+							yValEnd = options.yValueEnd,
+							allowDragX = options.allowDragX,
+							allowDragY = options.allowDragY,
+							xAxis = note.chart.xAxis[note.options.xAxis],
+							yAxis = note.chart.yAxis[note.options.yAxis],
+							newX = xAxis.toValue(x),
+							newY = yAxis.toValue(y);
+						
+						if(x !== 0 || y !==0){
+							if(allowDragX && allowDragY){
+								note.update({
+									xValue: defined(xVal) ? newX : null,
+									yValue: defined(yVal) ? newY : null,
+									xValueEnd: defined(xValEnd) ? xValEnd - xVal + newX : null,
+									yValueEnd: defined(yValEnd) ? yValEnd - yVal + newY : null,
+									x: defined(xVal) ? null : x,
+									y: defined(yVal) ? null : y
+								}, false);
+							} else if(allowDragX){
+								note.update({
+									xValue: defined(xVal) ? newX : null,
+									yValue: defined(yVal) ? yVal : null,
+									xValueEnd: defined(xValEnd) ? xValEnd - xVal + newX : null,
+									yValueEnd: defined(yValEnd) ? yValEnd : null,
+									x: defined(xVal) ? null : x,
+									y: defined(yVal) ? null : note.options.y
+								}, false);
+							} else if(allowDragY){
+								note.update({
+									xValue: defined(xVal) ? xVal : null,
+									yValue: defined(yVal) ? newY : null,
+									xValueEnd: defined(xValEnd) ? xValEnd : null,
+									yValueEnd: defined(yValEnd) ? yValEnd - yVal + newY : null,
+									x: defined(xVal) ? null : note.options.x,
+									y: defined(yVal) ? null : y
+								}, false);
+							}
+						}
+						chart.activeAnnotation = null;
+						chart.redraw(false);
+					} else {
+						chart.activeAnnotation = null;
+					}
+				}
         }
 };
 
@@ -596,6 +892,8 @@ Chart.prototype.callbacks.push(function (chart) {
         // initialize empty array for annotations
         if(!chart.annotations.allItems) chart.annotations.allItems = [];
 
+        // allow zoom or draw annotation
+        chart.annotations.allowZoom = true;
         
         // link chart object to annotations
         chart.annotations.chart = chart;
@@ -607,13 +905,20 @@ Chart.prototype.callbacks.push(function (chart) {
         chart.annotations.clipPaths = clipPaths;
 
         if (isArray(options) && options.length > 0) {
-                chart.addAnnotation(chart.options.annotations);
+			chart.addAnnotation(chart.options.annotations);
+        }
+        
+        chart.annotations.options = merge(chart.annotationsOptions ? chart.annotationsOptions : {},defatultMainOptions());
+        
+        if(chart.annotations.options.enabledButtons) {
+        	renderButtons(chart);
+        	attachEvents(chart);
         }
 
-				// update annotations after chart redraw
-				Highcharts.addEvent(chart, 'redraw', function () {
-								chart.redrawAnnotations();
-				});
+		// update annotations after chart redraw
+		Highcharts.addEvent(chart, 'redraw', function () {
+			chart.redrawAnnotations();
+		});
 				
 });
 
