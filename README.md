@@ -35,6 +35,10 @@
 <td align="left">chart.annotations </td>
 <td align="left"> Array containing annotation configuration objects</td>
 </tr>
+<tr>
+<td align="left">chart.annotationsOptions </td>
+<td align="left"> Default options for annotations (like buttons' list)</td>
+</tr>
 </tbody>
 </table>
 
@@ -223,7 +227,7 @@
 </table>
 
 
-<h3>Annotation options</h3>
+<h3>Chart.annotationsOptions</h3>
 
 <table>
 <thead>

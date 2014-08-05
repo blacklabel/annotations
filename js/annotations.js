@@ -907,8 +907,7 @@ Chart.prototype.callbacks.push(function (chart) {
         if (isArray(options) && options.length > 0) {
 			chart.addAnnotation(chart.options.annotations);
         }
-        
-        chart.annotations.options = merge(chart.annotationsOptions ? chart.annotationsOptions : {},defatultMainOptions());
+        chart.annotations.options = merge(defatultMainOptions(), chart.options.annotationsOptions ? chart.options.annotationsOptions : {});
         
         if(chart.annotations.options.enabledButtons) {
         	renderButtons(chart);
