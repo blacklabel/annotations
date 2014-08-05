@@ -569,21 +569,21 @@ Annotation.prototype = {
 
                 if (shape) {
                         shapeParams = extend({}, options.shape.params);
-                        if (options.units === 'values') {
-                                for (param in shapeParams) {
-                                        if (inArray(param, ['width', 'x']) > -1) {
-                                                shapeParams[param] = xAxis.translate(shapeParams[param]);
-                                        } else if (inArray(param, ['height', 'y']) > -1) {
-                                                shapeParams[param] = yAxis.translate(shapeParams[param]);
-                                        }
-                                }
-
+                        if (options.shape.units === 'values') {
                                 if (shapeParams.width) {
-                                        shapeParams.width -= xAxis.toPixels(0) - xAxis.left;
+                                        shapeParams.width = xAxis.toPixels(shapeParams.width) - xAxis.toPixels(0);
                                 }
 
-                                if (shapeParams.x) {
-                                        shapeParams.x += xAxis.minPixelPadding;
+                                if (defined(shapeParams.x)) {
+                                        shapeParams.x = xAxis.toPixels(shapeParams.x);
+                                }
+                                
+                                if (shapeParams.height) {
+                                        shapeParams.height = - yAxis.toPixels(shapeParams.height) + yAxis.toPixels(0);
+                                }
+
+                                if (defined(shapeParams.y)) {
+                                        shapeParams.y = yAxis.toPixels(shapeParams.y);
                                 }
 
                                 if (options.shape.type === 'path') {
