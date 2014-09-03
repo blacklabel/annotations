@@ -863,6 +863,13 @@ extend(Chart.prototype, {
 								each(chart.annotations.allItems, function (annotation) {
 										annotation.redraw();
 								});
+								each(chart.annotations.buttons, function(button, i) {
+										var xOffset = chart.rangeSelector ? chart.rangeSelector.inputGroup.offset : 0;
+												x = chart.plotWidth + chart.plotLeft - ((i+1) * 30) - xOffset,
+										button[0].attr({
+												x: x
+										});
+								});
 				}
 });
 
