@@ -298,7 +298,7 @@ function createClipPath(chart, y){
 
 function attachEvents(chart) {
 	function drag(e) {
-		var offset = $(container).offset(),
+		var offset = $(chart.container).offset(),
 			clickX = e.pageX - offset.left,
 			clickY = e.pageY - offset.top;
 		
@@ -338,7 +338,7 @@ function attachEvents(chart) {
 			}
 			chart.drawAnnotation = null;
 	}
-	Highcharts.addEvent(container, 'mousedown', drag);
+	Highcharts.addEvent(chart.container, 'mousedown', drag);
 	Highcharts.addEvent(document, 'mouseup', drop);	
 }
 
