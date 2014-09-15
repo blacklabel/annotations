@@ -919,6 +919,8 @@ Chart.prototype.callbacks.push(function (chart) {
         if(chart.annotations.options.enabledButtons) {
         	renderButtons(chart);
         	attachEvents(chart);
+        } else {
+					 chart.annotations.buttons = [];
         }
 
 		// update annotations after chart redraw
