@@ -125,6 +125,10 @@
 <td align="left">shape.params                              </td>
 <td align="left"> Shape parameters (parameters are passed to renderer method like rect, circle or path)</td>
 </tr>
+<tr>
+<td align="left"> events                              </td>
+<td align="left"> Object of events, supported are: mouseover, mouseout, mousedown, mouseup, click, dblclick. `this` in callback refers to the annotation object.</td>
+</tr>
 </tbody>
 </table>
 

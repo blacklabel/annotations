@@ -397,6 +397,7 @@ function getButtonCallback(index, chart) {
 	}	
 }
 
+
 // Define annotation prototype
 var Annotation = function () {
         this.init.apply(this, arguments);
@@ -417,85 +418,100 @@ Annotation.prototype = {
          */
         render: function (redraw) {
                 var annotation = this,
-                        chart = this.chart,
-                        renderer = annotation.chart.renderer,
-                        group = annotation.group,
-                        title = annotation.title,
-                        shape = annotation.shape,
-                        options = annotation.options,
-                        titleOptions = options.title,
-                        shapeOptions = options.shape,
-                        allowDragX = options.allowDragX,
-                        allowDragY = options.allowDragY,
-                        xAxis = chart.xAxis[options.xAxis],
-                        yAxis = chart.yAxis[options.yAxis],
-                        hasEvents = annotation.hasEvents;
-                        
+										chart = this.chart,
+										renderer = annotation.chart.renderer,
+										group = annotation.group,
+										title = annotation.title,
+										shape = annotation.shape,
+										options = annotation.options,
+										titleOptions = options.title,
+										shapeOptions = options.shape,
+										allowDragX = options.allowDragX,
+										allowDragY = options.allowDragY,
+										xAxis = chart.xAxis[options.xAxis],
+										yAxis = chart.yAxis[options.yAxis],
+										hasEvents = annotation.hasEvents;
+										
                 if (!group) {
-                        group = annotation.group = renderer.g();
+										group = annotation.group = renderer.g();
                 }
 
                 if (!shape && shapeOptions && inArray(shapeOptions.type, Highcharts.ALLOWED_SHAPES) !== -1) {
-                				shape = annotation.shape = renderer[options.shape.type](shapeOptions.params);
-                        shape.add(group);
+										shape = annotation.shape = renderer[options.shape.type](shapeOptions.params);
+										shape.add(group);
                 }
 
                 if (!title && titleOptions) {
-					title = annotation.title = renderer.label(titleOptions);
-					title.add(group);
+										title = annotation.title = renderer.label(titleOptions);
+										title.add(group);
                 }
                 if((allowDragX || allowDragY) && !hasEvents) {
-					$(group.element).on('mousedown', function(e){
-							annotation.events.storeAnnotation(e, annotation, chart);
-					});
-					addEvent(document, 'mouseup', function(e){
-							annotation.events.releaseAnnotation(e, chart);
-					});
-					group.on('dblclick', function(e){
-						if(annotation.options.linkedAnnotations) {
-							var items = chart.annotations.allItems,
-								iLen = items.length - 1,
-								id = annotation.options.linkedAnnotations,
-								i = 0;
-							
-							for(; iLen >= 0; iLen --){
-								var ann = items[iLen];
-								if(ann.options.linkedAnnotations === id) {
-									ann.events.destroyAnnotation(e, ann, chart);
-								}	
-							}
-						} else {
-							annotation.events.destroyAnnotation(e, annotation, chart);
-						}
-					});
+										$(group.element).on('mousedown', function(e){
+												annotation.events.storeAnnotation(e, annotation, chart);
+										});
+										addEvent(document, 'mouseup', function(e){
+												annotation.events.releaseAnnotation(e, chart);
+										});
+										group.on('dblclick', function(e){
+											if(annotation.options.linkedAnnotations) {
+												var items = chart.annotations.allItems,
+													iLen = items.length - 1,
+													id = annotation.options.linkedAnnotations,
+													i = 0;
+												
+												for(; iLen >= 0; iLen --){
+													var ann = items[iLen];
+													if(ann.options.linkedAnnotations === id) {
+														ann.events.destroyAnnotation(e, ann, chart);
+													}	
+												}
+											} else {
+												annotation.events.destroyAnnotation(e, annotation, chart);
+											}
+										});
+										attachCustomEvents(group, options.events);
                 } else if(!hasEvents){
-					group.on('dblclick', function(e){
-						if(annotation.options.linkedAnnotations) {
-							var items = chart.annotations.allItems,
-								iLen = items.length - 1,
-								id = annotation.options.linkedAnnotations,
-								i = 0;
-							
-							for(; iLen >= 0; iLen --){
-								var ann = items[iLen];
-								if(ann.options.linkedAnnotations === id) {
-									ann.events.destroyAnnotation(e, ann, chart);
-								}	
-							}
-						} else {
-							annotation.events.destroyAnnotation(e, annotation, chart);
-						}
-					});
-                }
-				this.hasEvents = true;
+										group.on('dblclick', function(e){
+											if(annotation.options.linkedAnnotations) {
+												var items = chart.annotations.allItems,
+													iLen = items.length - 1,
+													id = annotation.options.linkedAnnotations,
+													i = 0;
+												
+												for(; iLen >= 0; iLen --){
+													var ann = items[iLen];
+													if(ann.options.linkedAnnotations === id) {
+														ann.events.destroyAnnotation(e, ann, chart);
+													}	
+												}
+											} else {
+												annotation.events.destroyAnnotation(e, annotation, chart);
+											}
+										});
+										attachCustomEvents(group, options.events);
+								}
+								this.hasEvents = true;
                 
                 group.add(chart.annotations.groups[options.yAxis]);
                 
                 // link annotations to point or series
                 annotation.linkObjects();
+                
                 if (redraw !== false) {
                         annotation.redraw();
                 }
+                
+								function attachCustomEvents(element, events) {
+										if(defined(events)) {
+												for(var name in events) {
+														(function(name) {
+																Highcharts.addEvent(element.element, name, function(e) {
+																		events[name].call(annotation, e);
+																});
+														})(name);
+												};
+										}
+								}
         },
 
         /*

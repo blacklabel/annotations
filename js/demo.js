@@ -79,12 +79,31 @@ $(function () {
 								width: 55,
 								height: 40
 							}
+					},
+					events: {
+							mouseover: function(e) {
+									console.log("MouseOver", e, this);	
+							},
+							mouseout: function(e) {
+									console.log("MouseOut", e, this);	
+							},
+							mousedown: function(e) {
+									console.log("MouseDown", e, this);	
+							},
+							mouseup: function(e) {
+									console.log("MouseUp", e, this);	
+							},
+							click: function(e) {
+									console.log("Click", e, this);	
+							},
+							dblclick: function(e) {
+									console.log("Double Click", e, this);	
+							}
 					}
 				}],
 				series: [{
 						data: [13, 4, 5, {y: 1, id: 'high'}, 2, 1, 3, 2, 11, 6, 5, 13, 6, 9, 11, 2, 3, 7, 9, 11]
 				}]
 		};
-		
 		var chart = new Highcharts.StockChart(options);
 });
