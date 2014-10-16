@@ -30,6 +30,20 @@ if(H.VMLRenderer) {
 	H.VMLRenderer.prototype.symbols.line = H.SVGRenderer.prototype.symbols.line;
 }
 
+H.SVGRenderer.prototype.symbols.text = function(x,y,w,h){
+	var p = 1;
+	return [
+	  //'M', 0, 0, 'L', 10, 0, 'M', 5, 0, 'L', 5, 5
+		'M', x, y + p, 'L', x + w, y + p,
+		'M', x + w/2, y+p, 'L', x+w/2, y+p+h
+	];
+};
+// VML fallback
+if(H.VMLRenderer) {
+	H.VMLRenderer.prototype.symbols.text = H.SVGRenderer.prototype.symbols.text;
+}
+
+
 // when drawing annotation, don't zoom/select place
 H.wrap(H.Pointer.prototype, 'drag', function(c, e) {
 	if(!this.chart.annotations || this.chart.annotations.allowZoom){
@@ -48,9 +62,8 @@ var utils = {
 	getRadius: function(e) {
 		var ann = this,
 			chart = ann.chart, 
-			offset = $(chart.container).offset(),
-			x = e.pageX - offset.left,
-			y = e.pageY - offset.top,
+			x = e.pageX - chart.container.offsetLeft,
+			y = e.pageY - chart.container.offsetTop,
 			xAxis = chart.xAxis[ann.options.xAxis],
 			yAxis = chart.yAxis[ann.options.yAxis],
 			dx = Math.abs(x - xAxis.toPixels(ann.options.xValue)),
@@ -72,9 +85,8 @@ var utils = {
 	getPath: function(e) {
 		var ann = this,
 			chart = ann.chart, 
-			offset = $(chart.container).offset(),
-			x = e.pageX - offset.left,
-			y = e.pageY - offset.top,
+			x = e.pageX - chart.container.offsetLeft,
+			y = e.pageY - chart.container.offsetTop,
 			xAxis = chart.xAxis[ann.options.xAxis],
 			yAxis = chart.yAxis[ann.options.yAxis],
 			dx = x - xAxis.toPixels(ann.options.xValue),
@@ -107,9 +119,8 @@ var utils = {
 	getRect: function(e) {
 		var ann = this,
 			chart = ann.chart, 
-			offset = $(chart.container).offset(),
-			x = e.pageX - offset.left,
-			y = e.pageY - offset.top,
+			x = e.pageX - chart.container.offsetLeft,
+			y = e.pageY - chart.container.offsetTop,
 			xAxis = chart.xAxis[ann.options.xAxis],
 			yAxis = chart.yAxis[ann.options.yAxis],
 			sx = xAxis.toPixels(ann.options.xValue),
@@ -138,6 +149,36 @@ var utils = {
 		this.update({
 			shape: rect
 		});
+	},
+	getText: function(e) {
+		// do nothing
+	},
+	showInput: function(e) {
+		var ann = this,
+				chart = ann.chart, 
+				index = chart.annotationInputIndex = chart.annotationInputIndex ? chart.annotationInputIndex : 1,
+				input =  document.createElement('span'),
+				button;
+				
+		input.innerHTML = '<input type="text" class="annotation-' + index + '" placeholder="Add text"><button class=""> Done </button>';	
+		input.style.position = 'absolute';		
+		input.style.left = e.pageX + 'px';
+		input.style.top = e.pageY + 'px';
+		
+		document.body.appendChild(input);
+		input.querySelectorAll("input")[0].focus();
+		button = input.querySelectorAll("button")[0];
+		button.onclick = function() {
+				var parent = this.parentNode;
+				
+				ann.update({
+						title: {
+								text: parent.querySelectorAll('input')[0].value
+						}
+				});
+				parent.parentNode.removeChild(parent);
+		};
+		chart.annotationInputIndex++;
 	}
 }
         
@@ -176,8 +217,8 @@ function defaultOptions(shapeType) {
 
 function defatultMainOptions(){
 	var buttons = [],
-		shapes = ['circle', 'line', 'square'],
-		types = ['circle', 'path', 'rect'],
+		shapes = ['circle', 'line', 'square', 'text'],
+		types = ['circle', 'path', 'rect', 'path'],
 		params = [{
 			r: 5,
 			fill: 'rgba(255,0,0,0.4)',
@@ -192,8 +233,8 @@ function defatultMainOptions(){
 			fill: 'rgba(255,0,0,0.4)',
 			stroke: 'black'
 		}],
-		steps = [utils.getRadius, utils.getPath, utils.getRect],
-		stops = [utils.getRadiusAndUpdate, utils.getPathAndUpdate, utils.getRectAndUpdate];
+		steps = [utils.getRadius, utils.getPath, utils.getRect, utils.getText],
+		stops = [utils.getRadiusAndUpdate, utils.getPathAndUpdate, utils.getRectAndUpdate, utils.showInput];
 		
 	each(shapes, function(s, i) {
 		buttons.push({
@@ -298,9 +339,8 @@ function createClipPath(chart, y){
 
 function attachEvents(chart) {
 	function drag(e) {
-		var offset = $(chart.container).offset(),
-			clickX = e.pageX - offset.left,
-			clickY = e.pageY - offset.top;
+		var clickX = e.pageX - chart.container.offsetLeft,
+				clickY = e.pageY - chart.container.offsetTop;
 		
 		if (!chart.isInsidePlot(clickX - chart.plotLeft, clickY - chart.plotTop) || chart.annotations.allowZoom) {
 			return;
@@ -725,9 +765,8 @@ Annotation.prototype = {
                 	event.preventDefault();
                 	var container = chart.container;
 					if(chart.activeAnnotation) {
-						var offset = $(container).offset(),
-							clickX = event.pageX - offset.left,
-							clickY = event.pageY - offset.top;		
+						var clickX = event.pageX - chart.container.offsetLeft,
+								clickY = event.pageY - chart.container.offsetTop;
 								
 						if (!chart.isInsidePlot(clickX - chart.plotLeft, clickY - chart.plotTop)) {
 							return;

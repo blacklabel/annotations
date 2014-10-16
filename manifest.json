@@ -16,8 +16,8 @@
 		"highcharts": "3.0.7+"
 	},
 	"demo": [
-		"http://jsfiddle.net/BlackLabel/N6GR9/",
-		"http://jsfiddle.net/BlackLabel/7m3Mr/"
+		"http://jsfiddle.net/BlackLabel/7m3Mr/",
+		"http://jsfiddle.net/BlackLabel/N6GR9/"
 	],
 	"description": "Plugin that add annotations to Highcharts library. Advanced demo is available on the github: http://blacklabel.github.io/annotations/",
 	"keywords": [
