@@ -626,20 +626,23 @@ Annotation.prototype = {
                 if (shape) {
                         shapeParams = extend({}, options.shape.params);
                         if (options.shape.units === 'values') {
-                                if (shapeParams.width) {
-                                        shapeParams.width = xAxis.toPixels(shapeParams.width) - xAxis.toPixels(0);
-                                }
-
-                                if (defined(shapeParams.x)) {
+                        				// For ordinal axis, required are x&Y values - #22
+                        				if(defined(shapeParams.x) && shapeParams.width) {
+                        								shapeParams.width = xAxis.toPixels(shapeParams.width + shapeParams.x) - xAxis.toPixels(shapeParams.x);
                                         shapeParams.x = xAxis.toPixels(shapeParams.x);
-                                }
-                                
-                                if (shapeParams.height) {
-                                        shapeParams.height = - yAxis.toPixels(shapeParams.height) + yAxis.toPixels(0);
+                        				} else if(shapeParams.width) {
+                                        shapeParams.width = xAxis.toPixels(shapeParams.width) - xAxis.toPixels(0);
+                                } else if(defined(shapeParams.x)) {
+                                				shapeParams.x = xAxis.toPixels(shapeParams.x);
                                 }
 
-                                if (defined(shapeParams.y)) {
-                                        shapeParams.y = yAxis.toPixels(shapeParams.y);
+                                if (defined(shapeParams.y) && shapeParams.height) {
+                                        shapeParams.height = - yAxis.toPixels(shapeParams.height + shapeParams.y) + yAxis.toPixels(shapeParams.y);
+                                        shapeParams.y = yAxis.toPixels(shapeParams.y); 
+                                } else if (shapeParams.height) {
+                                        shapeParams.height = - yAxis.toPixels(shapeParams.height) + yAxis.toPixels(0);
+                                } else if (defined(shapeParams.y)) {
+                                				shapeParams.y = yAxis.toPixels(shapeParams.y);
                                 }
 
                                 if (options.shape.type === 'path') {
