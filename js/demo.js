@@ -33,7 +33,12 @@ $(function () {
 					allowDragX: true,
 					allowDragY: true,
 					x: 515,
-					y: 155
+					y: 155,
+					events: {
+							dblclick: function(e) {
+									this.destroy(); //destroy annotation
+							}
+					}
 				}, {
 					title: 'drag me <br> horizontaly',
 					anchorX: "left",

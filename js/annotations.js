@@ -51,6 +51,16 @@ H.wrap(H.Pointer.prototype, 'drag', function(c, e) {
 	}
 });
 
+// deselect active annotation
+H.wrap(H.Pointer.prototype, 'onContainerMouseDown', function(c, e) {
+		c.call(this,e);
+		if(this.chart.selectedAnnotation) {
+				this.chart.selectedAnnotation.events.deselect.call(this.chart.selectedAnnotation, e);
+		}
+});
+
+
+
 // Highcharts helper methods
 var inArray = HighchartsAdapter.inArray,
         merge = H.merge,
@@ -71,7 +81,7 @@ var utils = {
 			radius = parseInt(Math.sqrt(dx * dx + dy * dy), 10);
 		ann.shape.attr({
 			r: radius	
-		})
+		});
 		return radius;
 	},
 	getRadiusAndUpdate:	function(e) {
@@ -95,7 +105,7 @@ var utils = {
 		var path = ["M", 0, 0, 'L', parseInt(dx, 10), parseInt(dy, 10)];	
 		ann.shape.attr({
 			d: path	
-		})
+		});
 			
 		return path;
 	},
@@ -141,7 +151,7 @@ var utils = {
 			y: ret.y,
 			width: ret.width,
 			height: ret.height
-		})
+		});
 		return ret;
 	},
 	getRectAndUpdate: function(e) {
@@ -218,7 +228,7 @@ function defaultOptions(shapeType) {
 function defatultMainOptions(){
 	var buttons = [],
 		shapes = ['circle', 'line', 'square', 'text'],
-		types = ['circle', 'path', 'rect', 'path'],
+		types = ['circle', 'path', 'rect', null],
 		params = [{
 			r: 5,
 			fill: 'rgba(255,0,0,0.4)',
@@ -282,7 +292,7 @@ function defatultMainOptions(){
 	return {
 		enabledButtons: true,
 		buttons: buttons
-	}
+	};
 }
 
 function isArray(obj) {
@@ -332,7 +342,7 @@ function createClipPath(chart, y){
 				y: y.top,
 				width: y.width,
 				height: y.height
-		}
+		};
 				
 		return chart.renderer.clipRect(clipBox);   
 }
@@ -392,7 +402,7 @@ function renderButtons(chart) {
 }
 
 function renderButton(chart, button, i) {
-	var xOffset = chart.rangeSelector ? chart.rangeSelector.inputGroup.offset : 0;
+	var xOffset = chart.rangeSelector ? chart.rangeSelector.inputGroup.offset : 0,
 		renderer = chart.renderer,
 		symbol = button.symbol,
 		offset = 30,
@@ -434,7 +444,7 @@ function getButtonCallback(index, chart) {
 			chart.annotations.selected = index;
 			self.setState(2);
 		}
-	}	
+	};
 }
 
 
@@ -474,6 +484,7 @@ Annotation.prototype = {
 										
                 if (!group) {
 										group = annotation.group = renderer.g();
+										group.attr({ 'class': "highcharts-annotation" });
                 }
 
                 if (!shape && shapeOptions && inArray(shapeOptions.type, Highcharts.ALLOWED_SHAPES) !== -1) {
@@ -488,48 +499,20 @@ Annotation.prototype = {
                 if((allowDragX || allowDragY) && !hasEvents) {
 										$(group.element).on('mousedown', function(e){
 												annotation.events.storeAnnotation(e, annotation, chart);
+												annotation.events.select(e, annotation);
 										});
 										addEvent(document, 'mouseup', function(e){
 												annotation.events.releaseAnnotation(e, chart);
 										});
-										group.on('dblclick', function(e){
-											if(annotation.options.linkedAnnotations) {
-												var items = chart.annotations.allItems,
-													iLen = items.length - 1,
-													id = annotation.options.linkedAnnotations,
-													i = 0;
-												
-												for(; iLen >= 0; iLen --){
-													var ann = items[iLen];
-													if(ann.options.linkedAnnotations === id) {
-														ann.events.destroyAnnotation(e, ann, chart);
-													}	
-												}
-											} else {
-												annotation.events.destroyAnnotation(e, annotation, chart);
-											}
-										});
+										
 										attachCustomEvents(group, options.events);
                 } else if(!hasEvents){
-										group.on('dblclick', function(e){
-											if(annotation.options.linkedAnnotations) {
-												var items = chart.annotations.allItems,
-													iLen = items.length - 1,
-													id = annotation.options.linkedAnnotations,
-													i = 0;
-												
-												for(; iLen >= 0; iLen --){
-													var ann = items[iLen];
-													if(ann.options.linkedAnnotations === id) {
-														ann.events.destroyAnnotation(e, ann, chart);
-													}	
-												}
-											} else {
-												annotation.events.destroyAnnotation(e, annotation, chart);
-											}
+										$(group.element).on('mousedown', function(e){
+												annotation.events.select(e, annotation);
 										});
 										attachCustomEvents(group, options.events);
-								}
+								}                	
+
 								this.hasEvents = true;
                 
                 group.add(chart.annotations.groups[options.yAxis]);
@@ -542,6 +525,7 @@ Annotation.prototype = {
                 }
                 
 								function attachCustomEvents(element, events) {
+									console.log(events, element);
 										if(defined(events)) {
 												for(var name in events) {
 														(function(name) {
@@ -695,6 +679,11 @@ Annotation.prototype = {
                 //console.log(width+'/'+height);
                 x = x - width * anchorX;
                 y = y - height * anchorY;
+                
+                if(this.selectionMarker ) {
+										this.events.select({}, this);
+        				}
+                
                 if (redraw && chart.animation && defined(group.translateX) && defined(group.translateY)) {
                         group.animate({
                                 translateX: x,
@@ -760,6 +749,41 @@ Annotation.prototype = {
                 }
         },
         events: {
+        			select: function(e, ann, isClick) {
+        					var chart = ann.chart,
+        							prevAnn = chart.selectedAnnotation,
+        							box,
+        							padding = 10;
+        					
+        					if(prevAnn && prevAnn.selectionMarker && prevAnn !== ann) {
+        							prevAnn.selectionMarker.destroy();
+        							prevAnn.selectionMarker = false;
+        					}
+        				
+        					if(ann.selectionMarker) {
+											//ann.selectionMarker.destroy(); <-- if we destroy marker, then event won't be propagated
+											//ann.group.bBox = null;
+        					} else { 
+											box = ann.group.getBBox();
+											
+											ann.selectionMarker = chart.renderer.rect(box.x - padding / 2, box.y - padding / 2, box.width + padding, box.height + padding).attr({
+													'stroke-width': 1,
+													stroke: 'black',
+													fill: 'transparent',
+													dashstyle: 'ShortDash',
+													'shape-rendering': 'crispEdges'
+											});
+											ann.selectionMarker.add(ann.group);
+									}
+        					chart.selectedAnnotation = ann;
+							},
+							deselect: function(e) {
+									if(this.selectionMarker && this.group) {
+											this.selectionMarker.destroy();
+											this.selectionMarker = false;
+											this.group.bBox = null;
+									}
+							},
         	    destroyAnnotation: function(event, annotation) {
                 	annotation.destroy();	
                 },
@@ -784,6 +808,7 @@ Annotation.prototype = {
 						note.group.attr({
 							transform: 'translate(' + x + ',' + y + ')'
 						}); 
+						note.hadMove = true;
 					}
 				},
                 storeAnnotation: function(event, annotation, chart) {
@@ -854,7 +879,7 @@ Annotation.prototype = {
 									y: defined(yVal) ? null : y
 								}, false);
 							}
-						}
+						}						
 						chart.activeAnnotation = null;
 						chart.redraw(false);
 					} else {
