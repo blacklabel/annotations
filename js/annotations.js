@@ -5,6 +5,7 @@ var UNDEFINED,
         H = Highcharts,
         Chart = H.Chart,
         extend = H.extend,
+        merge = H.merge,
         each = H.each;
 
 H.ALLOWED_SHAPES = ["path", "rect", "circle"];
@@ -63,7 +64,6 @@ H.wrap(H.Pointer.prototype, 'onContainerMouseDown', function(c, e) {
 
 // Highcharts helper methods
 var inArray = HighchartsAdapter.inArray,
-        merge = H.merge,
         addEvent = H.addEvent,
         isOldIE = H.VMLRenderer ? true : false;
 
@@ -88,7 +88,11 @@ var utils = {
 		var r = utils.getRadius.call(this, e);
 		this.update({
 			shape: {
-				r: r	
+				params: {
+					r: r,
+					x: -r,
+					y: -r
+				}
 			}
 		});
 	},
@@ -122,7 +126,9 @@ var utils = {
 			xValueEnd: x,
 			yValueEnd: y,
 			shape: {
-				d: path	
+				params: {
+					d: path	
+				}
 			}
 		});
 	},
@@ -157,7 +163,9 @@ var utils = {
 	getRectAndUpdate: function(e) {
 		var rect = utils.getRect.call(this, e);
 		this.update({
-			shape: rect
+			shape: {
+				params: rect
+			}
 		});
 	},
 	getText: function(e) {
@@ -230,7 +238,7 @@ function defatultMainOptions(){
 		shapes = ['circle', 'line', 'square', 'text'],
 		types = ['circle', 'path', 'rect', null],
 		params = [{
-			r: 5,
+			r: 0,
 			fill: 'rgba(255,0,0,0.4)',
 			stroke: 'black'
 		}, {
@@ -275,7 +283,7 @@ function defatultMainOptions(){
 			style: {
 				fill: 'black',
 				stroke: 'blue',
-				strokeWidth: 2,
+				strokeWidth: 2
 			},
 			size: 12,
 			states: {
@@ -525,7 +533,6 @@ Annotation.prototype = {
                 }
                 
 								function attachCustomEvents(element, events) {
-									console.log(events, element);
 										if(defined(events)) {
 												for(var name in events) {
 														(function(name) {
@@ -533,7 +540,7 @@ Annotation.prototype = {
 																		events[name].call(annotation, e);
 																});
 														})(name);
-												};
+												}
 										}
 								}
         },
@@ -633,9 +640,8 @@ Annotation.prototype = {
                                         shapeParams.d = translatePath(shapeParams.d, xAxis, yAxis, x, y);
                                 }
                         }
-                        
-                        if(defined(options.yValueEnd) && defined(options.xValueEnd) && options.shape.d){
-                        	shapeParams.d = shapeParams.d || options.shape.d;
+                        if(defined(options.yValueEnd) && defined(options.xValueEnd)){
+                        	shapeParams.d = shapeParams.d || options.shape.d || ['M', 0, 0, 'L', 0, 0];
                         	shapeParams.d[4] = xAxis.toPixels(options.xValueEnd) - xAxis.toPixels(options.xValue);
                         	shapeParams.d[5] = yAxis.toPixels(options.yValueEnd) - yAxis.toPixels(options.yValue);
                         }
@@ -726,7 +732,7 @@ Annotation.prototype = {
          * Update the annotation with a given options
          */
         update: function (options, redraw) {
-                extend(this.options, options);
+                this.options = merge(this.options, options);
 
                 // update link to point or series
                 this.linkObjects();
@@ -947,8 +953,8 @@ extend(Chart.prototype, {
 										annotation.redraw();
 								});
 								each(chart.annotations.buttons, function(button, i) {
-										var xOffset = chart.rangeSelector ? chart.rangeSelector.inputGroup.offset : 0;
-												x = chart.plotWidth + chart.plotLeft - ((i+1) * 30) - xOffset,
+										var xOffset = chart.rangeSelector ? chart.rangeSelector.inputGroup.offset : 0,
+												x = chart.plotWidth + chart.plotLeft - ((i+1) * 30) - xOffset;
 										button[0].attr({
 												x: x
 										});

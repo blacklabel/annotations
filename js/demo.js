@@ -47,10 +47,12 @@ $(function () {
 					allowDragX: true,
 					xValue: 4,
 					yValue: 10,
+					xValueEnd: 7,
+					yValueEnd: 11,
 					shape: {
 							type: 'path',
 							params: {
-									d: ['M', 0, 0, 'L', 110, 0],
+									d: ['M', 0, 0, 'L', 10, 0],
 									stroke: '#c55'
 							}
 					}
