@@ -417,12 +417,12 @@ function renderButton(chart, button, i) {
 		symbolSize = symbol.size,
 		buttonSize = button.size,
 		x = chart.plotWidth + chart.plotLeft - ((i+1) * offset) - xOffset,
-		y = chart.plotTop - 23 - buttonSize,
+		y = chart.plotTop - (chart.rangeSelector ? 23 + buttonSize : 0),
 		callback = button.events && button.events.click ? button.events.click : getButtonCallback(i, chart),
 		selected = button.states.selected,
 		hovered = button.states.hover;
 		
-		var button = renderer.button('', x, y, callback, {}, hovered, selected).attr({ width: buttonSize, height: buttonSize });
+		var button = renderer.button('', x, y, callback, {}, hovered, selected).attr({ width: buttonSize, height: buttonSize, zIndex: 10 });
 		
 		var s = renderer.symbol(
 			symbol.shape,
