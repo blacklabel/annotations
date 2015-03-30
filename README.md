@@ -1,5 +1,8 @@
 <h1>Annotations - Highcharts module</h1>
 
+<p><div class="info">If you're interested in adding new features or modifying existing ones, please contact us: <a href="mailto:start@blacklabel.pl"> start@blacklabel.pl </a><br>
+You may also want to check our other demo here: <a href="http://demo.blacklabel.pl">http://demo.blacklabel.pl</a>.</div></p>
+
 <h2>Sample code</h2>
 
 <pre><code>new Highcharts.Chart({
