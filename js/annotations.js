@@ -713,6 +713,7 @@ Annotation.prototype = {
                 
                 if (index > -1) {
                         allItems.splice(index, 1);
+                        chart.options.annotations.splice(index, 1); // #33
                 }
 
                 each(['title', 'shape', 'group'], function (element) {
@@ -732,7 +733,17 @@ Annotation.prototype = {
          * Update the annotation with a given options
          */
         update: function (options, redraw) {
-                this.options = merge(this.options, options);
+                var annotation = this,
+										chart = this.chart,
+										allItems = chart.annotations.allItems,
+										index = allItems.indexOf(annotation),
+										o = merge(this.options, options);
+                        
+								if(index >= 0) {
+										chart.options.annotations[index] = o; // #33
+								}
+										
+                this.options = o;
 
                 // update link to point or series
                 this.linkObjects();
@@ -905,6 +916,8 @@ extend(Chart.prototype, {
 								var chart = this,
 												annotations = chart.annotations.allItems,
 												item,
+												i,
+												iter,
 												len;
 
 								if (!isArray(options)) {
@@ -913,9 +926,12 @@ extend(Chart.prototype, {
 
 								len = options.length;
 
-								while (len--) {
-												item = new Annotation(chart, options[len]);
-												annotations.push(item);
+								for (iter = 0; iter < len; iter++) {
+												item = new Annotation(chart, options[iter]);
+												i = annotations.push(item);
+												if(i > chart.options.annotations.length) {
+														chart.options.annotations.push(options[iter]); // #33
+												}
 												item.render(redraw);
 								}
 				},
