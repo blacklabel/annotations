@@ -72,8 +72,9 @@ var utils = {
 	getRadius: function(e) {
 		var ann = this,
 			chart = ann.chart, 
-			x = e.pageX - chart.container.offsetLeft,
-			y = e.pageY - chart.container.offsetTop,
+			bbox = chart.container.getBoundingClientRect(),
+			x = e.clientX - bbox.left,
+			y = e.clientY - bbox.top,
 			xAxis = chart.xAxis[ann.options.xAxis],
 			yAxis = chart.yAxis[ann.options.yAxis],
 			dx = Math.abs(x - xAxis.toPixels(ann.options.xValue)),
@@ -99,8 +100,9 @@ var utils = {
 	getPath: function(e) {
 		var ann = this,
 			chart = ann.chart, 
-			x = e.pageX - chart.container.offsetLeft,
-			y = e.pageY - chart.container.offsetTop,
+			bbox = chart.container.getBoundingClientRect(),
+			x = e.clientX - bbox.left,
+			y = e.clientY - bbox.top,
 			xAxis = chart.xAxis[ann.options.xAxis],
 			yAxis = chart.yAxis[ann.options.yAxis],
 			dx = x - xAxis.toPixels(ann.options.xValue),
@@ -135,8 +137,9 @@ var utils = {
 	getRect: function(e) {
 		var ann = this,
 			chart = ann.chart, 
-			x = e.pageX - chart.container.offsetLeft,
-			y = e.pageY - chart.container.offsetTop,
+			bbox = chart.container.getBoundingClientRect(),
+			x = e.clientX - bbox.left,
+			y = e.clientY - bbox.top,
 			xAxis = chart.xAxis[ann.options.xAxis],
 			yAxis = chart.yAxis[ann.options.yAxis],
 			sx = xAxis.toPixels(ann.options.xValue),
@@ -357,8 +360,9 @@ function createClipPath(chart, y){
 
 function attachEvents(chart) {
 	function drag(e) {
-		var clickX = e.pageX - chart.container.offsetLeft,
-				clickY = e.pageY - chart.container.offsetTop;
+		var bbox = chart.container.getBoundingClientRect(),
+				clickX = e.clientX - bbox.left,
+				clickY = e.clientY - bbox.top;
 		
 		if (!chart.isInsidePlot(clickX - chart.plotLeft, clickY - chart.plotTop) || chart.annotations.allowZoom) {
 			return;
@@ -809,16 +813,17 @@ Annotation.prototype = {
                 	event.preventDefault();
                 	var container = chart.container;
 					if(chart.activeAnnotation) {
-						var clickX = event.pageX - chart.container.offsetLeft,
-								clickY = event.pageY - chart.container.offsetTop;
+						var bbox = chart.container.getBoundingClientRect(),
+								clickX = event.clientX - bbox.left,
+								clickY = event.clientY - bbox.top;
 								
 						if (!chart.isInsidePlot(clickX - chart.plotLeft, clickY - chart.plotTop)) {
 							return;
 						}		
 						var note = chart.activeAnnotation;
 								
-						var x = note.options.allowDragX ? event.pageX - note.startX + note.group.translateX : note.group.translateX,
-							y = note.options.allowDragY ? event.pageY - note.startY + note.group.translateY : note.group.translateY;
+						var x = note.options.allowDragX ? event.clientX - note.startX + note.group.translateX : note.group.translateX,
+							y = note.options.allowDragY ? event.clientY - note.startY + note.group.translateY : note.group.translateY;
 					
 						note.transX = x;
 						note.transY = y;
@@ -834,8 +839,8 @@ Annotation.prototype = {
 						event.preventDefault();
 					}
 					if((!isOldIE && event.button === 0) || (isOldIE && event.button === 1)) {
-						var posX = event.pageX,
-								posY = event.pageY;
+						var posX = event.clientX,
+								posY = event.clientY;
 						chart.activeAnnotation = annotation;
 						chart.activeAnnotation.startX = posX;
 						chart.activeAnnotation.startY = posY;
