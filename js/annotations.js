@@ -302,7 +302,8 @@ function defatultMainOptions(){
 		
 	return {
 		enabledButtons: true,
-		buttons: buttons
+		buttons: buttons,
+		buttonsOffsets: [0, 0]
 	};
 }
 
@@ -414,14 +415,15 @@ function renderButtons(chart) {
 }
 
 function renderButton(chart, button, i) {
-	var xOffset = chart.rangeSelector ? chart.rangeSelector.inputGroup.offset : 0,
+	var userOffset = chart.annotations.options.buttonsOffsets,
+		xOffset = chart.rangeSelector ? chart.rangeSelector.inputGroup.offset : 0,
 		renderer = chart.renderer,
 		symbol = button.symbol,
 		offset = 30,
 		symbolSize = symbol.size,
 		buttonSize = button.size,
-		x = chart.plotWidth + chart.plotLeft - ((i+1) * offset) - xOffset,
-		y = chart.plotTop - (chart.rangeSelector ? 23 + buttonSize : 0),
+		x = chart.plotWidth + chart.plotLeft - ((i+1) * offset) - xOffset - userOffset[0],
+		y = chart.plotTop - (chart.rangeSelector ? 23 + buttonSize : 0) + userOffset[1],
 		callback = button.events && button.events.click ? button.events.click : getButtonCallback(i, chart),
 		selected = button.states.selected,
 		hovered = button.states.hover;
@@ -949,8 +951,10 @@ extend(Chart.prototype, {
 									yAxes = chart.yAxis,
 									yLen = yAxes.length,
 									ann = chart.annotations,
+									userOffset = ann.options.buttonsOffsets,
 									i = 0;
 
+									
 								for(; i < yLen; i++){
 									var y = yAxes[i],
 										clip = ann.clipPaths[i];
@@ -974,8 +978,8 @@ extend(Chart.prototype, {
 										annotation.redraw();
 								});
 								each(chart.annotations.buttons, function(button, i) {
-										var xOffset = chart.rangeSelector ? chart.rangeSelector.inputGroup.offset : 0,
-												x = chart.plotWidth + chart.plotLeft - ((i+1) * 30) - xOffset;
+										var	xOffset = chart.rangeSelector ? chart.rangeSelector.inputGroup.offset : 0,
+												x = chart.plotWidth + chart.plotLeft - ((i+1) * 30) - xOffset - userOffset[0];
 										button[0].attr({
 												x: x
 										});
