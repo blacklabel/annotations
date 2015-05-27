@@ -1010,6 +1010,8 @@ Chart.prototype.callbacks.push(function (chart) {
 
         if(!chart.annotations) chart.annotations = {};
         
+        if(!chart.options.annotations) chart.options.annotations = [];
+        
         // initialize empty array for annotations
         if(!chart.annotations.allItems) chart.annotations.allItems = [];
 
