@@ -732,6 +732,30 @@ Annotation.prototype = {
         },
 
         /*
+         * Show annotation, only for non-linked annotations
+         */
+        show: function () {
+			if (!this.linkedObject) {
+				this.visible = true;
+				this.group.attr({
+					visibility: "visible"
+				});
+			}
+        },
+
+        /*
+         * Hide annotation, only for non-linked annotations
+         */
+        hide: function () {
+			if (!this.linkedObject) {
+				this.visible = false;
+				this.group.attr({
+					visibility: "hidden"
+				});
+			}
+        },
+
+        /*
          * Update the annotation with a given options
          */
         update: function (options, redraw) {
