@@ -1,12 +1,16 @@
 (function (Highcharts, HighchartsAdapter) {
 
+// Highcharts helper methods
 var UNDEFINED,
         ALIGN_FACTOR,
         H = Highcharts,
         Chart = H.Chart,
         extend = H.extend,
         merge = H.merge,
-        each = H.each;
+        each = H.each,
+        inArray = HighchartsAdapter.inArray,
+        addEvent = H.addEvent,
+        isOldIE = H.VMLRenderer ? true : false;
 
 H.ALLOWED_SHAPES = ["path", "rect", "circle"];
 
@@ -26,10 +30,6 @@ H.SVGRenderer.prototype.symbols.line = function(x,y,w,h){
 		'M', x + p, y + p, 'L', x + w - p, y + h - p
 	];
 };
-// VML fallback
-if(H.VMLRenderer) {
-	H.VMLRenderer.prototype.symbols.line = H.SVGRenderer.prototype.symbols.line;
-}
 
 H.SVGRenderer.prototype.symbols.text = function(x,y,w,h){
 	var p = 1;
@@ -42,6 +42,7 @@ H.SVGRenderer.prototype.symbols.text = function(x,y,w,h){
 // VML fallback
 if(H.VMLRenderer) {
 	H.VMLRenderer.prototype.symbols.text = H.SVGRenderer.prototype.symbols.text;
+	H.VMLRenderer.prototype.symbols.line = H.SVGRenderer.prototype.symbols.line;
 }
 
 
@@ -59,13 +60,6 @@ H.wrap(H.Pointer.prototype, 'onContainerMouseDown', function(c, e) {
 				this.chart.selectedAnnotation.events.deselect.call(this.chart.selectedAnnotation, e);
 		}
 });
-
-
-
-// Highcharts helper methods
-var inArray = HighchartsAdapter.inArray,
-        addEvent = H.addEvent,
-        isOldIE = H.VMLRenderer ? true : false;
 
 // utils for buttons   
 var utils = {
@@ -581,18 +575,20 @@ Annotation.prototype = {
                                                 (linkedTo instanceof Highcharts.Series) ? 'series' : null;
 
                         if (linkType === 'point') {
-                                options.xValue = linkedTo.x;
-                                options.yValue = linkedTo.y;
-                                series = linkedTo.series;
+                            options.x = linkedTo.plotX + chart.plotLeft;
+                            options.y = linkedTo.plotY + chart.plotTop;
+                            series = linkedTo.series;
                         } else if (linkType === 'series') {
-                                series = linkedTo;
+                            series = linkedTo;
                         }
 
-                        if (group.visibility !== series.group.visibility) {
-                                group.attr({
-                                        visibility: series.group.visibility
-                                });
-                        }
+                        // #48 - series.grouping and series.stacking may reposition point.graphic
+                        if (series.pointXOffset) {
+                        	options.x += series.pointXOffset + (linkedTo.shapeArgs.width / 2 || 0);
+                    	}
+                        group.attr({
+                            visibility: series.group.attr("visibility")
+                        });
                 }
 
 
