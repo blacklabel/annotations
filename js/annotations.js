@@ -1,4 +1,4 @@
-(function (Highcharts, HighchartsAdapter) {
+(function (Highcharts) {
 
 // Highcharts helper methods
 var UNDEFINED,
@@ -8,7 +8,7 @@ var UNDEFINED,
         extend = H.extend,
         merge = H.merge,
         each = H.each,
-        inArray = HighchartsAdapter.inArray,
+        inArray = (window.HighchartsAdapter && window.HighchartsAdapter.inArray) || H.inArray, // #52, since Highcharts 4.1.10 HighchartsAdapter is only provided by the Highcharts Standalone Framework
         addEvent = H.addEvent,
         isOldIE = H.VMLRenderer ? true : false;
 
@@ -1099,4 +1099,4 @@ if (!Array.prototype.indexOf) {
     };
 }
 
-}(Highcharts, HighchartsAdapter));
+}(Highcharts));
