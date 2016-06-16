@@ -1,5 +1,11 @@
-(function (H) {
-	/* global $ Highcharts document window:true */
+/* global $ Highcharts document window module:true */
+(function (factory) {
+	if (typeof module === 'object' && module.exports) {
+		module.exports = factory;
+	} else {
+		factory(Highcharts);
+	}
+}(function (H) {
 	'use strict';
 	// Highcharts helper methods
 	var UNDEFINED,
@@ -1089,4 +1095,4 @@
 			return -1;
 		};
 	}
-}(Highcharts));
+}));
