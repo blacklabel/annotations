@@ -3,6 +3,14 @@
 <p><div class="info">If you're interested in adding new features or modifying existing ones, please contact us: <a href="mailto:start@blacklabel.pl"> start@blacklabel.pl </a><br>
 You may also want to check our other demo here: <a href="http://demo.blacklabel.pl">http://demo.blacklabel.pl</a>.</div></p>
 
+<h2>Installation</h2>
+
+<p>Like any other Highcharts module (e.g. exporting), add <code>&lt;script&gt;</code> tag pointing to <code>annotations.js</code> below Highcharts script tag.</p>
+
+<p>For NPM users:</p>
+<pre><code>var Highcharts = require('highcharts'),
+    HighchartsAnnotations = require('annotations')(Highcharts);</code></pre>
+
 <h2>Sample code</h2>
 
 <pre><code>new Highcharts.Chart({
