@@ -1,0 +1,28 @@
+{
+  "name": "highcharts-annotations",
+  "version": "1.2.10",
+  "description": "Highcharts plugin to add dynamic annotations to charts.",
+  "main": "js/annotations.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/blacklabel/annotations.git"
+  },
+  "keywords": [
+    "highcharts",
+    "highstock",
+    "annotations"
+  ],
+  "author": "Black Label <start@blacklabel.pl> (http://blacklabel.pl)",
+  "license": "SEE LICENSE IN license.txt",
+  "bugs": {
+    "url": "https://github.com/blacklabel/annotations/issues"
+  },
+  "homepage": "https://github.com/blacklabel/annotations#readme",
+  "files": [
+    "js/annotations.js"
+  ],
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-eslint": "^2.0.0"
+  }
+}
