@@ -11,6 +11,12 @@ You may also want to check our other demo here: <a href="http://demo.blacklabel.
 <pre><code>var Highcharts = require('highcharts'),
     HighchartsAnnotations = require('annotations')(Highcharts);</code></pre>
 
+<p>For BOWER users:</p>
+<pre><code>
+	bower install highcharts-annotations
+</code></pre>
+
+
 <h2>Sample code</h2>
 
 <pre><code>new Highcharts.Chart({

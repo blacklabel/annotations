@@ -1,0 +1,26 @@
+{
+  "name": "highcharts-annotations",
+  "version": "1.3.0",
+  "homepage": "http://blacklabel.github.io/annotations/",
+  "authors": [
+    "Sebastian Bochan <sebastian@blacklabel.pl>",
+    "Paweł Fus <pawel@blacklabel.pl>",
+    "Kacper Madej <kacper@blacklabel.pl>"
+  ],
+  "description": "Highcharts plugin to add dynamic annotations to charts.",
+  "main": "annotations.js",
+  "keywords": [
+    "highcharts",
+    "highstock",
+    "annotations"
+  ],
+  "license": "Creative Commons Attribution (CC)",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "app/bower_components",
+    "test",
+    "tests"
+  ]
+}
