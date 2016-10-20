@@ -132,7 +132,7 @@ You may also want to check our other demo here: <a href="http://demo.blacklabel.
 </tr>
 <tr>
 <td align="left">shape.type                                </td>
-<td align="left"> Shape type, available types are "path", "circle" and "square"</td>
+<td align="left"> Shape type, available types are "path", "circle" and "rect"</td>
 </tr>
 <tr>
 <td align="left">shape.units                               </td>
@@ -140,7 +140,7 @@ You may also want to check our other demo here: <a href="http://demo.blacklabel.
 </tr>
 <tr>
 <td align="left">shape.params                              </td>
-<td align="left"> Shape parameters (parameters are passed to renderer method like square, circle or path)</td>
+<td align="left"> Shape parameters (parameters are passed to renderer method like rect, circle or path)</td>
 </tr>
 <tr>
 <td align="left"> events                              </td>
@@ -164,12 +164,12 @@ You may also want to check our other demo here: <a href="http://demo.blacklabel.
 <tr>
 <td align="left">shape.params.x<br>shape.params.y             </td>
 <td align="left"> Shape position relative to the annotation position </td>
-<td align="left">square<br>circle</td>
+<td align="left">rect<br>circle</td>
 </tr>
 <tr>
 <td align="left">shape.params.width<br>shape.params.height    </td>
-<td align="left"> Rectangle width and height (only for "square" type)  </td>
-<td align="left"> square</td>
+<td align="left"> Rectangle width and height (only for "rect" type)  </td>
+<td align="left"> rect</td>
 </tr>
 <tr>
 <td align="left">shape.params.d                               </td>
