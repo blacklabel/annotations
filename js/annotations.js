@@ -515,7 +515,7 @@
 			}
 
 			if (!shape && shapeOptions && inArray(shapeOptions.type, H.ALLOWED_SHAPES) !== -1) {
-				shape = annotation.shape = renderer[options.shape.type]().attr(shapeOptions.params);
+				shape = annotation.shape = shapeOptions.type === 'rect' ? renderer[options.shape.type]().attr(shapeOptions.params) : renderer[options.shape.type](shapeOptions.params);
 				shape.add(group);
 			}
 
