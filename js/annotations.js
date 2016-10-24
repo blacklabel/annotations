@@ -600,6 +600,9 @@
 			// what is minPointOffset? Doesn't work in 4.0+
 			x = (defined(options.xValue) ? xAxis.toPixels(options.xValue /* + xAxis.minPointOffset */) : options.x);
 			y = defined(options.yValue) ? yAxis.toPixels(options.yValue) : options.y;
+			if(chart.inverted && defined(options.xValue) && defined(options.yValue)) {
+				var tmp=x; x=y; y=tmp;
+			}
 
 			if (isNaN(x) || isNaN(y) || !isNumber(x) || !isNumber(y)) {
 				return;
