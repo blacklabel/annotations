@@ -426,14 +426,15 @@
 
 	function renderButton(chart, mainButton, i) {
 		var userOffset = chart.annotations.options.buttonsOffsets,
-			xOffset = chart.rangeSelector ? chart.rangeSelector.inputGroup.offset : 0,
+			xOffset = chart.rangeSelector && chart.rangeSelector.inputGroup ? chart.rangeSelector.inputGroup.offset : 0,
 			renderer = chart.renderer,
 			symbol = mainButton.symbol,
 			offset = 30,
 			symbolSize = symbol.size,
-			buttonSize = mainButton.size,
+			padding = 8 / 2,// since Highcahrts 5.0, padding = 8 is hardcoded
+			buttonSize = mainButton.size - padding,
 			x = chart.plotWidth + chart.plotLeft - ((i + 1) * offset) - xOffset - userOffset[0],
-			y = chart.plotTop - (chart.rangeSelector ? 23 + buttonSize : 0) + userOffset[1],
+			y = chart.plotTop - (chart.rangeSelector ? 23 + buttonSize + padding : 0) + userOffset[1],
 			callback = mainButton.events && mainButton.events.click ? mainButton.events.click : getButtonCallback(i, chart),
 			selected = mainButton.states.selected,
 			hovered = mainButton.states.hover,
@@ -441,11 +442,10 @@
 			s;
 			
 		button = renderer.button('', x, y, callback, {}, hovered, selected).attr({ width: buttonSize, height: buttonSize, zIndex: 10 });
-		
 		s = renderer.symbol(
 			symbol.shape,
-			buttonSize - symbolSize / 2,
-			buttonSize - symbolSize / 2,
+			buttonSize - symbolSize / 2 + padding,
+			buttonSize - symbolSize / 2 + padding,
 			symbolSize,
 			symbolSize
 		).attr(symbol.style).add(button);
@@ -994,7 +994,7 @@
 				annotation.redraw();
 			});
 			each(chart.annotations.buttons, function (button, j) {
-				var	xOffset = chart.rangeSelector ? chart.rangeSelector.inputGroup.offset : 0,
+				var	xOffset = chart.rangeSelector && chart.rangeSelector.inputGroup ? chart.rangeSelector.inputGroup.offset : 0,
 					x = chart.plotWidth + chart.plotLeft - ((j + 1) * 30) - xOffset - userOffset[0];
 				button[0].attr({
 					x: x
