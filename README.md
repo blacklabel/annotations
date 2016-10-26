@@ -1,4 +1,4 @@
-<h1>Annotations - Highcharts module</h1>
+<h1>Annotations module</h1>
 
 <p><div class="info">If you're interested in adding new features or modifying existing ones, please contact us: <a href="mailto:start@blacklabel.pl"> start@blacklabel.pl </a><br>
 You may also want to check our other demo here: <a href="http://demo.blacklabel.pl">http://demo.blacklabel.pl</a>.</div></p>
@@ -10,12 +10,8 @@ You may also want to check our other demo here: <a href="http://demo.blacklabel.
 <p>For NPM users:</p>
 <pre><code>var Highcharts = require('highcharts'),
     HighchartsAnnotations = require('annotations')(Highcharts);</code></pre>
-
 <p>For BOWER users:</p>
-<pre><code>
-	bower install highcharts-annotations
-</code></pre>
-
+<pre><code>bower install highcharts-annotations</code></pre>
 
 <h2>Sample code</h2>
 
@@ -31,6 +27,9 @@ You may also want to check our other demo here: <a href="http://demo.blacklabel.
     yValue: 125,
     title: {
         text: "Annotated chart!"
+    },
+    events: {
+        click: function(e) { console.log("Annotation clicked:", this); }
     }
   }]
 })
@@ -88,7 +87,7 @@ You may also want to check our other demo here: <a href="http://demo.blacklabel.
 </tr>
 <tr>
 <td align="left">anchorX<br>anchorY                        </td>
-<td align="left"> Defines annotation anchor point (see below), available values:<br>anchorX: left, center, right<br>anchorY: top, middle, bottom</td>
+<td align="left"> Defines annotation anchor point, available values:<br><pre>anchorX: "left"/"center"/"right"</pre><br><pre>anchorY: "top"/"middle"/"bottom"</pre></td>
 </tr>
 <tr>
 <td align="left">allowDragX<br>allowDragY</td>
@@ -97,10 +96,6 @@ You may also want to check our other demo here: <a href="http://demo.blacklabel.
 <tr>
 <td align="left">linkedTo                                  </td>
 <td align="left"> Link annotation to point or series using it's id</td>
-</tr>
-<tr>
-<td align="left">linkedAnnotations                                  </td>
-<td align="left"> Annotations with the same value/id will be removed together after double click</td>
 </tr>
 <tr>
 <td align="left">title                                     </td>
@@ -132,7 +127,7 @@ You may also want to check our other demo here: <a href="http://demo.blacklabel.
 </tr>
 <tr>
 <td align="left">shape.type                                </td>
-<td align="left"> Shape type, available types are "path", "circle" and "rect"</td>
+<td align="left"> Shape type, available types are <code>"path"</code>, <code>"circle"</code> and <code>"rect"</code></td>
 </tr>
 <tr>
 <td align="left">shape.units                               </td>
@@ -144,7 +139,18 @@ You may also want to check our other demo here: <a href="http://demo.blacklabel.
 </tr>
 <tr>
 <td align="left"> events                              </td>
-<td align="left"> Object of events, supported are: mouseover, mouseout, mousedown, mouseup, click, dblclick. `this` in callback refers to the annotation object.</td>
+<td align="left"> Object of events, supported are: <code>mouseover, mouseout, mousedown, mouseup, click, dblclick</code>. <code>this</code> in a callback refers to the annotation object.</td>
+</tr>
+<tr>
+<td align="left"> selectionMarker                              </td>
+<td align="left"> Styles for a selected annotation, defaults to: 
+<code>{
+		'stroke-width': 1,
+		stroke: 'black',
+		fill: 'transparent',
+		dashstyle: 'ShortDash',
+		'shape-rendering': 'crispEdges'
+}</code></td>
 </tr>
 </tbody>
 </table>
@@ -168,12 +174,12 @@ You may also want to check our other demo here: <a href="http://demo.blacklabel.
 </tr>
 <tr>
 <td align="left">shape.params.width<br>shape.params.height    </td>
-<td align="left"> Rectangle width and height (only for "rect" type)  </td>
+<td align="left"> Rectangle width and height (only for <code>"rect"</code> type)  </td>
 <td align="left"> rect</td>
 </tr>
 <tr>
 <td align="left">shape.params.d                               </td>
-<td align="left"> Path definition (only for "path" type)             </td>
+<td align="left"> Path definition (only for <code>"path"</code> type)             </td>
 <td align="left"> path</td>
 </tr>
 <tr>
@@ -183,17 +189,17 @@ You may also want to check our other demo here: <a href="http://demo.blacklabel.
 </tr>
 <tr>
 <td align="left">shape.params.fill                            </td>
-<td align="left"> Fill color, default: transparent                   </td>
+<td align="left"> Fill color, default: <code>"transparent"</code>                  </td>
 <td align="left"> -</td>
 </tr>
 <tr>
 <td align="left">shape.params.stroke                          </td>
-<td align="left"> Stroke color, default: black                       </td>
+<td align="left"> Stroke color, default: <code>"black"</code>                       </td>
 <td align="left"> -</td>
 </tr>
 <tr>
 <td align="left">shape.params.strokeWidth                     </td>
-<td align="left"> Stroke width (and line width for path), default: 2 </td>
+<td align="left"> Stroke width (and line width for path), default: <code>2</code> </td>
 <td align="left"> -</td>
 </tr>
 </tbody>
@@ -238,23 +244,30 @@ You may also want to check our other demo here: <a href="http://demo.blacklabel.
 <tbody>
 <tr>
 <td align="left">annotation.update(options) </td>
-<td align="left"> Update annotation with given options</td>
+<td align="left"> Update an annotation with given options</td>
 </tr>
 <tr>
 <td align="left">annotation.destroy()       </td>
-<td align="left"> Destroy annotation</td>
+<td align="left"> Destroy an annotation</td>
 </tr>
 <tr>
 <td align="left">annotation.show()</td>
-<td align="left"> Show annotation - only for non-linked annotations</td>
+<td align="left"> Show an annotation - only for non-linked annotations</td>
 </tr>
 <tr>
 <td align="left">annotation.hide()</td>
-<td align="left"> Hide annotation - only for non-linked annotations</td>
+<td align="left"> Hide an annotation - only for non-linked annotations</td>
+</tr>
+<tr>
+<td align="left">annotation.select()</td>
+<td align="left"> Select an annotation by adding selection box</td>
+</tr>
+<tr>
+<td align="left">annotation.deselect()</td>
+<td align="left"> Deselect an annotation by removing selection box</td>
 </tr>
 </tbody>
 </table>
-
 
 <h3>Chart.annotationsOptions</h3>
 
@@ -268,11 +281,12 @@ You may also want to check our other demo here: <a href="http://demo.blacklabel.
 <tbody>
 <tr>
 <td align="left"> enabledButtons </td>
-<td align="left"> Enable or disable buttons for drawing annotations </td>
+<td align="left"> Enable or disable buttons for drawing annotations. <br>
+Selected button prevents from zooming and panning to draw annotation. </td>
 </tr>
 <tr>
 <td align="left"> buttonsOffsets </td>
-<td align="left"> Offsets for the buttons in array: [x-offset, y-offset]. Useful when placing annotations next to the exporting module, etc. Defaults to [0, 0]. </td>
+<td align="left"> Offsets for the buttons in array: <code>[x-offset, y-offset]</code>. Useful when placing annotations next to the exporting module, etc. Defaults to <code>[0, 0]</code>. </td>
 </tr>
 <tr>
 <td align="left"> buttons      </td>
@@ -290,12 +304,12 @@ You may also want to check our other demo here: <a href="http://demo.blacklabel.
 		shape: {
 			type: 'path',
 			params: {
-				d: ['M', 0, 0, 'L', 100, 100]
+				d: ['M', 0, 0, 'L', 100, 100 ]
 			}
 		}
 	},
 	symbol: { // button symbol options
-		shape: 'square', // shape, taken from Highcharts.symbols
+		shape: 'rect', // shape, taken from Highcharts.symbols
 		size: 12,
 		style: {
 			'stroke-width':  2,
