@@ -431,7 +431,7 @@
 			symbol = mainButton.symbol,
 			offset = 30,
 			symbolSize = symbol.size,
-			padding = 8 / 2,// since Highcahrts 5.0, padding = 8 is hardcoded
+			padding = 8 / 2, // since Highcahrts 5.0, padding = 8 is hardcoded
 			buttonSize = mainButton.size - padding,
 			x = chart.plotWidth + chart.plotLeft - ((i + 1) * offset) - xOffset - userOffset[0],
 			y = chart.plotTop - (chart.rangeSelector ? 23 + buttonSize + padding : 0) + userOffset[1],
@@ -600,8 +600,8 @@
 			// what is minPointOffset? Doesn't work in 4.0+
 			x = (defined(options.xValue) ? xAxis.toPixels(options.xValue /* + xAxis.minPointOffset */) : options.x);
 			y = defined(options.yValue) ? yAxis.toPixels(options.yValue) : options.y;
-			if(chart.inverted && defined(options.xValue) && defined(options.yValue)) {
-				var tmp=x; x=y; y=tmp;
+			if (chart.inverted && defined(options.xValue) && defined(options.yValue)) {
+				var tmp = x; x = y; y = tmp;
 			}
 
 			if (isNaN(x) || isNaN(y) || !isNumber(x) || !isNumber(y)) {
