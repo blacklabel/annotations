@@ -217,6 +217,13 @@
 					fill: 'rgba(0,0,0,0)',
 					'stroke-width': 2
 				}
+			},
+			selectionMarker: {
+				'stroke-width': 1,
+				stroke: 'black',
+				fill: 'transparent',
+				dashstyle: 'ShortDash',
+				'shape-rendering': 'crispEdges'
 			}
 		};
 
@@ -478,6 +485,7 @@
 
 			this.chart = chart;
 			this.options = merge({}, defaultOptions(shapeType), options);
+			this.userOptions = options;
 		},
 
 		/*
@@ -781,7 +789,21 @@
 			this.linkObjects();
 
 			this.render(redraw);
+			return this;
 		},
+		/*
+		 * API select & deselect:
+		 */
+		select: function () {
+			this.events.select(null, this);
+			return this;
+		},
+		deselect: function () {
+			this.events.deselect(null, this);
+			this.chart.selectedAnnotation = null;
+			return this;
+		},
+
 
 		linkObjects: function () {
 			var annotation = this,
@@ -804,24 +826,19 @@
 					box,
 					padding = 10;
 				
-				if (prevAnn && prevAnn.selectionMarker && prevAnn !== ann) {
-					prevAnn.selectionMarker.destroy();
-					prevAnn.selectionMarker = false;
+				if (prevAnn && prevAnn !== ann) {
+					prevAnn.deselect();
 				}
 			
-				if (ann.selectionMarker) {
-					// ann.selectionMarker.destroy(); <-- if we destroy marker, then event won't be propagated
-					// ann.group.bBox = null;
-				} else {
+				if (!ann.selectionMarker) {
 					box = ann.group.getBBox();
 					
-					ann.selectionMarker = chart.renderer.rect(box.x - padding / 2, box.y - padding / 2, box.width + padding, box.height + padding).attr({
-						'stroke-width': 1,
-						stroke: 'black',
-						fill: 'transparent',
-						dashstyle: 'ShortDash',
-						'shape-rendering': 'crispEdges'
-					});
+					ann.selectionMarker = chart.renderer.rect(
+						box.x - padding / 2,
+						box.y - padding / 2,
+						box.width + padding,
+						box.height + padding
+					).attr(ann.options.selectionMarker);
 					ann.selectionMarker.add(ann.group);
 				}
 				chart.selectedAnnotation = ann;
