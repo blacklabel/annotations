@@ -600,6 +600,9 @@
 			// what is minPointOffset? Doesn't work in 4.0+
 			x = (defined(options.xValue) ? xAxis.toPixels(options.xValue /* + xAxis.minPointOffset */) : options.x);
 			y = defined(options.yValue) ? yAxis.toPixels(options.yValue) : options.y;
+			if(chart.inverted && defined(options.xValue) && defined(options.yValue)) {
+				var tmp=x; x=y; y=tmp;
+			}
 
 			if (isNaN(x) || isNaN(y) || !isNumber(x) || !isNumber(y)) {
 				return;
@@ -621,12 +624,15 @@
 			if (shape) {
 				shapeParams = extend({}, options.shape.params);
 				if (options.shape.units === 'values') {
+					var realXAxis = chart.inverted ? yAxis : xAxis;
+					var realYAxis = chart.inverted ? xAxis : yAxis;
+
 					// For ordinal axis, required are x&Y values - #22
 					if (defined(shapeParams.x) && shapeParams.width) {
 						shapeParams.width = xAxis.toPixels(shapeParams.width + shapeParams.x) - xAxis.toPixels(shapeParams.x);
 						shapeParams.x = xAxis.toPixels(shapeParams.x);
 					} else if (shapeParams.width) {
-						shapeParams.width = xAxis.toPixels(shapeParams.width) - xAxis.toPixels(0);
+						shapeParams.width = realXAxis.toPixels(shapeParams.width) - realXAxis.toPixels(0);
 					} else if (defined(shapeParams.x)) {
 						shapeParams.x = xAxis.toPixels(shapeParams.x);
 					}
@@ -635,7 +641,8 @@
 						shapeParams.height = -yAxis.toPixels(shapeParams.height + shapeParams.y) + yAxis.toPixels(shapeParams.y);
 						shapeParams.y = yAxis.toPixels(shapeParams.y);
 					} else if (shapeParams.height) {
-						shapeParams.height = -yAxis.toPixels(shapeParams.height) + yAxis.toPixels(0);
+						shapeParams.height = -realYAxis.toPixels(shapeParams.height) + realYAxis.toPixels(0);
+						shapeParams.height *= chart.inverted ? -1 : 1;
 					} else if (defined(shapeParams.y)) {
 						shapeParams.y = yAxis.toPixels(shapeParams.y);
 					}
