@@ -43,10 +43,8 @@
 						bbox = chart.container.getBoundingClientRect(),
 						x = e.clientX - bbox.left,
 						y = e.clientY - bbox.top,
-						xAxis = chart.xAxis[ann.options.xAxis],
-						yAxis = chart.yAxis[ann.options.yAxis],
-						dx = Math.abs(x - xAxis.toPixels(ann.options.xValue)),
-						dy = Math.abs(y - yAxis.toPixels(ann.options.yValue)),
+						dx = Math.abs(x - ann.options.x),
+						dy = Math.abs(y - ann.options.y),
 						radius = parseInt(Math.sqrt(dx * dx + dy * dy), 10);
 
 					ann.shape.attr({
@@ -74,10 +72,8 @@
 						bbox = chart.container.getBoundingClientRect(),
 						x = e.clientX - bbox.left,
 						y = e.clientY - bbox.top,
-						xAxis = chart.xAxis[ann.options.xAxis],
-						yAxis = chart.yAxis[ann.options.yAxis],
-						dx = x - xAxis.toPixels(ann.options.xValue),
-						dy = y - yAxis.toPixels(ann.options.yValue);
+						dx = x - ann.options.x,
+						dy = y - ann.options.y;
 					
 					var path = ['M', 0, 0, 'L', parseInt(dx, 10), parseInt(dy, 10)];
 					ann.shape.attr({
@@ -88,16 +84,9 @@
 				},
 				getPathAndUpdate: function (e) {
 					var ann = this,
-						chart = ann.chart,
-						path = annotationEvents.getPath.call(ann, e),
-						xAxis = chart.xAxis[ann.options.xAxis],
-						yAxis = chart.yAxis[ann.options.yAxis],
-						x = xAxis.toValue(path[4] + xAxis.toPixels(ann.options.xValue)),
-						y = yAxis.toValue(path[5] + yAxis.toPixels(ann.options.yValue));
+						path = annotationEvents.getPath.call(ann, e);
 					
 					this.update({
-						xValueEnd: x,
-						yValueEnd: y,
 						shape: {
 							params: {
 								d: path
@@ -111,10 +100,8 @@
 						bbox = chart.container.getBoundingClientRect(),
 						x = e.clientX - bbox.left,
 						y = e.clientY - bbox.top,
-						xAxis = chart.xAxis[ann.options.xAxis],
-						yAxis = chart.yAxis[ann.options.yAxis],
-						sx = xAxis.toPixels(ann.options.xValue),
-						sy = yAxis.toPixels(ann.options.yValue),
+						sx = ann.options.x,
+						sy = ann.options.y,
 						dx = x - sx,
 						dy = y - sy,
 						w = Math.round(dx) + 1,
@@ -404,13 +391,11 @@
 					return;
 				}
 
-				var xAxis = chart.xAxis[0],
-					yAxis = chart.yAxis[0],
-					selected = chart.annotationsDrawer.selected;
+				var selected = chart.annotationsDrawer.selected;
 
 				var options = merge(chart.annotationsDrawer.options.buttons[selected].annotation, {
-					xValue: xAxis.toValue(clickX),
-					yValue: yAxis.toValue(clickY),
+					x: clickX,
+					y: clickY,
 					allowDragX: true,
 					allowDragY: true
 				});
