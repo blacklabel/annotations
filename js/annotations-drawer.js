@@ -19,8 +19,7 @@
 		@returns {Object} annotations drawer option object
 	**/
 	function getDefaultOptions() {
-		var buttons = [],
-			shapes = ['circle', 'line', 'square', 'text'],
+		var shapes = ['circle', 'line', 'square', 'text'],
 			types = ['circle', 'path', 'rect', null],
 			params = [{
 				r: 0,
@@ -35,111 +34,117 @@
 				height: 10,
 				fill: 'rgba(255,0,0,0.4)',
 				stroke: 'black'
-			}],
-			annotationEvents = {
-				getRadius: function (e) {
-					var ann = this,
-						chart = ann.chart,
-						bbox = chart.container.getBoundingClientRect(),
-						x = e.clientX - bbox.left,
-						y = e.clientY - bbox.top,
-						dx = Math.abs(x - ann.options.x),
-						dy = Math.abs(y - ann.options.y),
-						radius = parseInt(Math.sqrt(dx * dx + dy * dy), 10);
+			}];
 
-					ann.shape.attr({
-						r: radius
-					});
 
-					return radius;
-				},
-				getRadiusAndUpdate:	function (e) {
-					var r = annotationEvents.getRadius.call(this, e);
 
-					this.update({
-						shape: {
-							params: {
-								r: r,
-								x: -r,
-								y: -r
-							}
-						}
-					});
-				},
-				getPath: function (e) {
-					var ann = this,
-						chart = ann.chart,
-						bbox = chart.container.getBoundingClientRect(),
-						x = e.clientX - bbox.left,
-						y = e.clientY - bbox.top,
-						dx = x - ann.options.x,
-						dy = y - ann.options.y;
-					
-					var path = ['M', 0, 0, 'L', parseInt(dx, 10), parseInt(dy, 10)];
-					ann.shape.attr({
+		/* ****************************************************************************
+		 * START steps events                                                        *
+	    **************************************************************************** */
+
+		/**
+			contains event handlers called on mouse move, handlers resize shapes according to mouse position
+		**/
+		var steps = {
+			'circle': function (e) {
+				var ann = this,
+					chart = ann.chart,
+					bbox = chart.container.getBoundingClientRect(),
+					x = e.clientX - bbox.left,
+					y = e.clientY - bbox.top,
+					dx = Math.abs(x - ann.options.x),
+					dy = Math.abs(y - ann.options.y),
+					radius = Math.sqrt(dx * dx + dy * dy);
+
+				ann.options.shape.params = {
+					r: radius,
+					x: -radius,
+					y: -radius
+				};
+
+				ann.shape.attr({
+					r: radius
+				});
+			},
+
+			'square': function (e) {
+				var ann = this,
+					chart = ann.chart,
+					bbox = chart.container.getBoundingClientRect(),
+					x = e.clientX - bbox.left,
+					y = e.clientY - bbox.top,
+					sx = ann.options.x,
+					sy = ann.options.y,
+					dx = x - sx,
+					dy = y - sy,
+					w = Math.round(dx) + 1,
+					h = Math.round(dy) + 1,
+					rect = {};
+				
+				rect.x = w < 0 ? w : 0;
+				rect.width = Math.abs(w);
+				rect.y = h < 0 ? h : 0;
+				rect.height = Math.abs(h);
+
+				ann.options.shape.params = {
+					x: rect.x,
+					y: rect.y,
+					width: rect.width,
+					height: rect.height
+				};
+
+				ann.shape.attr(rect);
+			},
+
+			'line': function (e) {
+				var ann = this,
+					chart = ann.chart,
+					bbox = chart.container.getBoundingClientRect(),
+					x = e.clientX - bbox.left,
+					y = e.clientY - bbox.top,
+					dx = x - ann.options.x,
+					dy = y - ann.options.y,
+					path = ['M', 0, 0, 'L', dx, dy];
+
+				ann.options.shape.params = {
+					params: {
 						d: path
-					});
-					
-					return path;
-				},
-				getPathAndUpdate: function (e) {
-					var ann = this,
-						path = annotationEvents.getPath.call(ann, e);
-					
-					this.update({
-						shape: {
-							params: {
-								d: path
-							}
-						}
-					});
-				},
-				getRect: function (e) {
-					var ann = this,
-						chart = ann.chart,
-						bbox = chart.container.getBoundingClientRect(),
-						x = e.clientX - bbox.left,
-						y = e.clientY - bbox.top,
-						sx = ann.options.x,
-						sy = ann.options.y,
-						dx = x - sx,
-						dy = y - sy,
-						w = Math.round(dx) + 1,
-						h = Math.round(dy) + 1,
-						ret = {};
-					
-					ret.x = w < 0 ? w : 0;
-					ret.width = Math.abs(w);
-					ret.y = h < 0 ? h : 0;
-					ret.height = Math.abs(h);
+					}
+				};
 
-					ann.shape.attr({
-						x: ret.x,
-						y: ret.y,
-						width: ret.width,
-						height: ret.height
-					});
-					return ret;
-				},
-				getRectAndUpdate: function (e) {
-					var rect = annotationEvents.getRect.call(this, e);
+				ann.shape.attr({
+					d: path
+				});
+			},
 
-					this.update({
-						shape: {
-							params: rect
-						}
-					});
-				},
-				getText: function () {
-				// do nothing
-				},
-				showInput: function (e) {
+			'text': function () {}
+		};
+
+		/* ****************************************************************************
+		 * END steps events                                                        *
+	    **************************************************************************** */
+
+
+		/* ****************************************************************************
+		 * START stops events                                                        *
+	    **************************************************************************** */
+
+		var updateAnnotation = H.Annotation.prototype.update,
+
+			/**
+				contains event handlers called on document mouse up, handlers update the annotation
+			**/
+			stops = {
+				'circle': updateAnnotation,
+				'square': updateAnnotation,
+				'line': updateAnnotation,
+				'text': function (e) {
 					var ann = this,
 						chart = ann.chart,
 						index = chart.annotationInputIndex = chart.annotationInputIndex || 1,
 						input = document.createElement('span'),
 						button;
-
+						
 					input.innerHTML = '<input type="text" class="annotation-' + index + '" placeholder="Add text"><button class=""> Done </button>';
 					input.style.position = 'absolute';
 					input.style.left = e.pageX + 'px';
@@ -162,15 +167,16 @@
 				}
 			};
 
+		/* ****************************************************************************
+		 * END stops events                                                        *
+	    **************************************************************************** */
 
-		var steps = [annotationEvents.getRadius, annotationEvents.getPath, annotationEvents.getRect, annotationEvents.getText],
-			stops = [annotationEvents.getRadiusAndUpdate, annotationEvents.getPathAndUpdate, annotationEvents.getRectAndUpdate, annotationEvents.showInput];
-
-		each(shapes, function (s, i) {
+		var buttons = [];
+		each(shapes, function (shape, i) {
 			buttons.push({
 				annotationEvents: {
-					step: steps[i],
-					stop: stops[i]
+					step: steps[shape],
+					stop: stops[shape]
 				},
 				annotation: {
 					anchorX: 'left',
@@ -183,7 +189,7 @@
 					}
 				},
 				symbol: {
-					shape: s,
+					shape: shape,
 					size: 12,
 					style: {
 						'stroke-width': 2,
@@ -216,6 +222,10 @@
 		};
 	}
 
+
+	/* ****************************************************************************
+	 * START AnnotationsDrawer class                                             *
+    **************************************************************************** */
 
 	/**
 		@class AnnotationsDrawer
@@ -370,7 +380,7 @@
 				@param {Object} e - event
 				@returns {undefined}
 			**/
-			function step(e) {
+			function drag(e) {
 				var selected = chart.annotationsDrawer.selected;
 				chart.annotationsDrawer.options.buttons[selected].annotationEvents.step.call(chart.drawAnnotation, e);
 			}
@@ -382,7 +392,7 @@
 				@param {Object} e - event
 				@returns {undefined}
 			**/
-			function drag(e) {
+			function dragStart(e) {
 				var bbox = chart.container.getBoundingClientRect(),
 					clickX = e.clientX - bbox.left,
 					clickY = e.clientY - bbox.top;
@@ -403,7 +413,7 @@
 				chart.addAnnotation(options);
 
 				chart.drawAnnotation = chart.annotations.allItems[chart.annotations.allItems.length - 1];
-				addEvent(document, 'mousemove', step);
+				addEvent(document, 'mousemove', drag);
 			}
 
 			/**
@@ -414,7 +424,7 @@
 				@returns {undefined}
 			**/
 			function drop(e) {
-				removeEvent(document, 'mousemove', step);
+				removeEvent(document, 'mousemove', drag);
 
 				// store annotation details
 				if (chart.drawAnnotation) {
@@ -423,13 +433,18 @@
 				}
 				chart.drawAnnotation = null;
 			}
-			addEvent(chart.container, 'mousedown', drag);
+			addEvent(chart.container, 'mousedown', dragStart);
 			addEvent(document, 'mouseup', drop);
 		}
 	};
 
 	/* ****************************************************************************
-	 * Start Highcharts wrappers                                                  *
+	 * END AnnotationsDrawer class                                             *
+    **************************************************************************** */
+
+
+	/* ****************************************************************************
+	 * START Highcharts wrappers                                                  *
     *****************************************************************************/
 
 
@@ -452,7 +467,7 @@
 	});
 
 	/* ****************************************************************************
-	 * End Highcharts wrappers                                                  *
+	 * END Highcharts wrappers                                                  *
     *****************************************************************************/
 
 	H.SVGRenderer.prototype.symbols.line = function (x, y, w, h) {
@@ -475,6 +490,4 @@
 		H.VMLRenderer.prototype.symbols.text = H.SVGRenderer.prototype.symbols.text;
 		H.VMLRenderer.prototype.symbols.line = H.SVGRenderer.prototype.symbols.line;
 	}
-
-	
 }));
