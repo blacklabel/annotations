@@ -1,4 +1,4 @@
-/* global document, Highcharts */
+/* global document, Highcharts, module:true */
 (function (factory) {
 	if (typeof module === 'object' && module.exports) {
 		module.exports = factory;
@@ -13,6 +13,11 @@
 		addEvent = H.addEvent,
 		removeEvent = H.removeEvent;
 	
+	/**
+		@description contains all the default options for the annotations drawer
+
+		@returns {Object} annotations drawer option object
+	**/
 	function getDefaultOptions() {
 		var buttons = [],
 			shapes = ['circle', 'line', 'square', 'text'],
@@ -225,6 +230,13 @@
 	}
 
 
+	/**
+		@class AnnotationsDrawer
+		@classdesc A tool for drawings annotations
+
+		@param {Object} userOptions - options specified by a user
+		@param {Object} chart - a chart object which an annotations drawer is hooked into
+	**/
 	function AnnotationsDrawer(userOptions, chart) {
 		this.init(userOptions, chart);
 	}
@@ -238,22 +250,45 @@
 			this.setOptions(userOptions);
 		},
 
+		/**
+			@description merges options with the default options
+			
+			@param {Object} userOptions - options specified by a user
+			@returns {undefined}
+		**/
 		setOptions: function (userOptions) {
 			this.userOptions = userOptions;
 			this.options = merge(getDefaultOptions(), userOptions);
 		},
 
+		/**
+			@description renders all element of the annotations drawer
+
+			@returns {undefined}
+		**/
 		render: function () {
 			this.renderButtons();
 			this.attachEvents();
 		},
 
+		/**
+			@description calls a render method for each button
+
+			@returns {undefined}
+		**/
 		renderButtons: function () {
 			each(this.options.buttons, function (button, i) {
 				this.buttons.push(this.renderButton(button, i));
 			}, this);
 		},
 
+		/**
+			@description renders, positions a button from the options, attaches on click event to the button
+
+			@param {Object} mainButton - contains options for buttons
+			@param {Number} i - index of the button which will be created
+			@returns {undefined}
+		**/
 		renderButton: function (mainButton, i) {
 			var annotationsDrawer = this,
 				chart = this.chart,
@@ -305,6 +340,14 @@
 			return [button, symbol];
 		},
 
+
+		/**
+			@description on button click handler, changing states of the button and disable ability to zoom/pan chart
+
+			@param {Object} e - event
+			@param {Number} index - index of the clicked button
+			@returns {undefined}
+		**/
 		onButtonClick: function (e, index) {
 			var annotationsDrawer = this,
 				buttons = annotationsDrawer.buttons;
@@ -325,13 +368,33 @@
 			}
 		},
 
+		/**
+			@description attaches events allowing drawing annotations
+
+			@returns {undefined}
+		**/
 		attachEvents: function () {
 			var chart = this.chart;
 
+			/**
+				@description calls a step method associated with the selected button
+
+				@private
+				@param {Object} e - event
+				@returns {undefined}
+			**/
 			function step(e) {
 				var selected = chart.annotationsDrawer.selected;
 				chart.annotationsDrawer.options.buttons[selected].annotationEvents.step.call(chart.drawAnnotation, e);
 			}
+
+			/**
+				@description starts dragging state - creates annotation and adds an event which calls a step method on moouse move
+
+				@private
+				@param {Object} e - event
+				@returns {undefined}
+			**/
 			function drag(e) {
 				var bbox = chart.container.getBoundingClientRect(),
 					clickX = e.clientX - bbox.left,
@@ -358,6 +421,13 @@
 				addEvent(document, 'mousemove', step);
 			}
 
+			/**
+				@description drops the dragging state and calls a button specific stop method
+
+				@private
+				@param {Object} e - event
+				@returns {undefined}
+			**/
 			function drop(e) {
 				removeEvent(document, 'mousemove', step);
 
@@ -373,6 +443,11 @@
 		}
 	};
 
+	/* ****************************************************************************
+	 * Start Highcharts wrappers                                                  *
+    *****************************************************************************/
+
+
 	H.Chart.prototype.callbacks.push(function (chart) {
 		var annotationsOptions = chart.options.annotationsOptions;
 
@@ -382,6 +457,18 @@
 			annotationsDrawer.render();
 		}
 	});
+
+	// when drawing annotation, don't zoom/select place
+	H.wrap(H.Pointer.prototype, 'drag', function (c, e) {
+		var annotationsDrawer = this.chart.annotationsDrawer;
+		if (!annotationsDrawer || annotationsDrawer.allowZoom) {
+			c.call(this, e);
+		}
+	});
+
+	/* ****************************************************************************
+	 * End Highcharts wrappers                                                  *
+    *****************************************************************************/
 
 	H.SVGRenderer.prototype.symbols.line = function (x, y, w, h) {
 		var p = 2;
@@ -404,11 +491,5 @@
 		H.VMLRenderer.prototype.symbols.line = H.SVGRenderer.prototype.symbols.line;
 	}
 
-	// when drawing annotation, don't zoom/select place
-	H.wrap(H.Pointer.prototype, 'drag', function (c, e) {
-		var annotationsDrawer = this.chart.annotationsDrawer;
-		if (!annotationsDrawer || annotationsDrawer.allowZoom) {
-			c.call(this, e);
-		}
-	});
+	
 }));
