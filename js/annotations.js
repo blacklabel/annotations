@@ -17,7 +17,8 @@
 		inArray = (window.HighchartsAdapter && window.HighchartsAdapter.inArray) || H.inArray, // #52, since Highcharts 4.1.10 HighchartsAdapter is only provided by the Highcharts Standalone Framework
 		addEvent = H.addEvent,
 		removeEvent = H.removeEvent,
-		isOldIE = H.VMLRenderer ? true : false;
+		isOldIE = H.VMLRenderer ? true : false,
+		destroyOnKeyUp;
 
 	H.ALLOWED_SHAPES = ['path', 'rect', 'circle'];
 
@@ -137,7 +138,7 @@
 
 
 	// Define annotation prototype
-	var Annotation = function () { // eslint-disable-line
+	var Annotation = H.Annotation = function () { // eslint-disable-line
 		this.init.apply(this, arguments);
 	};
 
@@ -153,22 +154,21 @@
 			this.userOptions = options;
 		},
 
-		/*
-		 * Render the annotation
-		 */
-		render: function (redraw) {
+		/**
+			Attaches events for allowing dragging the annotation, attaching events specified by a user in the options,
+			attaching a global event for deleting annotations by a key
+
+			@returns {undefined}
+		**/
+		attachEvents: function () {
 			var annotation = this,
 				chart = this.chart,
-				renderer = annotation.chart.renderer,
-				group = annotation.group,
-				title = annotation.title,
-				shape = annotation.shape,
-				options = annotation.options,
-				titleOptions = options.title,
-				shapeOptions = options.shape,
+				options = this.options,
 				allowDragX = options.allowDragX,
 				allowDragY = options.allowDragY,
-				hasEvents = annotation.hasEvents;
+				hasEvents = annotation.hasEvents,
+				group = annotation.group,
+				globalAnnotationOptions = H.defaultOptions.annotation;
 
 			function attachCustomEvents(element, events) {
 				if (defined(events)) {
@@ -182,20 +182,7 @@
 				}
 			}
 
-			if (!group) {
-				group = annotation.group = renderer.g();
-				group.attr({ 'class': 'highcharts-annotation' });
-			}
 
-			if (!shape && shapeOptions && inArray(shapeOptions.type, H.ALLOWED_SHAPES) !== -1) {
-				shape = annotation.shape = shapeOptions.type === 'rect' ? renderer[options.shape.type]().attr(shapeOptions.params) : renderer[options.shape.type](shapeOptions.params);
-				shape.add(group);
-			}
-
-			if (!title && titleOptions) {
-				title = annotation.title = renderer.label(titleOptions);
-				title.add(group);
-			}
 			if ((allowDragX || allowDragY) && !hasEvents) {
 				$(group.element).on('mousedown', function (e) {
 					annotation.events.storeAnnotation(e, annotation, chart);
@@ -213,7 +200,76 @@
 				attachCustomEvents(group, options.events);
 			}
 
-			this.hasEvents = true;
+			if (H.chartCount === 1 && globalAnnotationOptions.destroyOnKeyUp) {
+				addEvent(document.body, 'keyup', annotation.onBodyKeyUp);
+				destroyOnKeyUp = true;
+			}
+
+			annotation.hasEvents = true;
+		},
+
+		/**
+			Deattaches events for an annotation, it does not remove events for dom elements
+
+			@returns {undefined}
+		**/
+		deattachEvents: function () {
+			if (!H.chartCount && destroyOnKeyUp) {
+				removeEvent(document.body, 'keyup', this.onBodyKeyUp);
+				destroyOnKeyUp = false;
+			}
+		},
+
+		/**
+			A global event allowing deletion an annotation on key up, attached to document.body
+
+			@param {Object} e - event
+			@this Window
+			@returns {undefined}
+		**/
+		onBodyKeyUp: function (e) {
+			if (e.keyCode === 46) { //delete key, on mac fn + backspace
+				H.each(H.charts, function (chart) {
+					var selectedAnnotation = chart.selectedAnnotation;
+
+					if (selectedAnnotation && selectedAnnotation.options.destroyOnKeyUp) {
+						selectedAnnotation.destroy();
+						chart.selectedAnnotation = undefined;		
+					}
+				});
+			}
+		},
+
+		/*
+		 * Render the annotation
+		 */
+		render: function (redraw) {
+			var annotation = this,
+				chart = this.chart,
+				renderer = annotation.chart.renderer,
+				group = annotation.group,
+				title = annotation.title,
+				shape = annotation.shape,
+				options = annotation.options,
+				titleOptions = options.title,
+				shapeOptions = options.shape;
+
+			if (!group) {
+				group = annotation.group = renderer.g();
+				group.attr({ 'class': 'highcharts-annotation' });
+			}
+
+			if (!shape && shapeOptions && inArray(shapeOptions.type, H.ALLOWED_SHAPES) !== -1) {
+				shape = annotation.shape = shapeOptions.type === 'rect' ? renderer[options.shape.type]().attr(shapeOptions.params) : renderer[options.shape.type](shapeOptions.params);
+				shape.add(group);
+			}
+
+			if (!title && titleOptions) {
+				title = annotation.title = renderer.label(titleOptions);
+				title.add(group);
+			}
+
+			this.attachEvents();
 			
 			group.add(chart.annotations.groups[options.yAxis]);
 			
@@ -406,6 +462,8 @@
 					annotation[element] = null;
 				}
 			});
+
+			annotation.deattachEvents();
 
 			annotation.group = annotation.title = annotation.shape = annotation.chart = annotation.options = annotation.hasEvents = null;
 		},
@@ -640,6 +698,7 @@
 
 			for (iter = 0; iter < len; iter++) {
 				item = new Annotation(chart, options[iter]);
+
 				i = annotations.push(item);
 				if (i > chart.options.annotations.length) {
 					chart.options.annotations.push(options[iter]); // #33
@@ -714,9 +773,6 @@
 		if (!chart.annotations.allItems) {
 			chart.annotations.allItems = [];
 		}
-
-		// allow zoom or draw annotation
-		// chart.annotations.allowZoom = true;
 		
 		// link chart object to annotations
 		chart.annotations.chart = chart;
@@ -736,6 +792,7 @@
 			chart.redrawAnnotations();
 		});
 	});
+
 
 	if (!Array.prototype.indexOf) {
 		Array.prototype.indexOf = function (searchElement) { // eslint-disable-line
