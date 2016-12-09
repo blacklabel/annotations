@@ -188,6 +188,7 @@
 					annotation.events.storeAnnotation(e, annotation, chart);
 					annotation.events.select(e, annotation);
 				});
+				//TO DO this event should be added once for all annotations, not for every ann
 				addEvent(document, 'mouseup', function (e) {
 					annotation.events.releaseAnnotation(e, chart);
 				});
@@ -200,7 +201,7 @@
 				attachCustomEvents(group, options.events);
 			}
 
-			if (H.chartCount === 1 && globalAnnotationOptions.destroyOnKeyUp) {
+			if (H.chartCount === 1 && globalAnnotationOptions && globalAnnotationOptions.destroyOnKeyUp) {
 				addEvent(document.body, 'keyup', annotation.onBodyKeyUp);
 				destroyOnKeyUp = true;
 			}
@@ -240,12 +241,13 @@
 			}
 		},
 
-		/*
-		 * Render the annotation
-		 */
-		render: function (redraw) {
+		/**
+			Creates SVG elements for an annotation if they have not been renderer yet
+
+			@returns {undefined}
+		**/
+		renderElements: function () {
 			var annotation = this,
-				chart = this.chart,
 				renderer = annotation.chart.renderer,
 				group = annotation.group,
 				title = annotation.title,
@@ -268,10 +270,19 @@
 				title = annotation.title = renderer.label(titleOptions);
 				title.add(group);
 			}
+		},
 
-			this.attachEvents();
-			
-			group.add(chart.annotations.groups[options.yAxis]);
+		/*
+		 * Render the annotation
+		 */
+		render: function (redraw) {
+			var annotation = this,
+				chart = this.chart;
+
+			annotation.renderElements();
+			annotation.attachEvents();
+
+			annotation.group.add(chart.annotations.groups[annotation.options.yAxis]); // ??
 			
 			// link annotations to point or series
 			annotation.linkObjects();
@@ -327,7 +338,7 @@
 
 			// Based on given options find annotation pixel position
 			// what is minPointOffset? Doesn't work in 4.0+
-			x = (defined(options.xValue) ? xAxis.toPixels(options.xValue /* + xAxis.minPointOffset */) : options.x);
+			x = defined(options.xValue) ? xAxis.toPixels(options.xValue /* + xAxis.minPointOffset */) : options.x;
 			y = defined(options.yValue) ? yAxis.toPixels(options.yValue) : options.y;
 			if (chart.inverted && defined(options.xValue) && defined(options.yValue)) {
 				var tmp = x; x = y; y = tmp;
@@ -783,7 +794,7 @@
 		// add clip path to annotations
 		chart.annotations.clipPaths = clipPaths;
 
-		if (isArray(options) && options.length > 0) {
+		if (isArray(options) && options.length) {
 			chart.addAnnotation(chart.options.annotations);
 		}
 
