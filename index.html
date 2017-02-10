@@ -1,21 +1,19 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
 <head>
-  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-
-  <title>Highcharts Demo - annotations demo</title>
-  
-  <script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
-	<script src="https://code.highcharts.com/stock/highstock.js"></script>
-  <script src="./js/annotations.js"></script>
-  <script src="./js/demo.js"></script>
-  
-	<link rel="stylesheet" charset="utf-8" type="text/css" href="css/styles.css"/>
-
+<title>Custom events - Highcharts module</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<link rel="stylesheet" type="text/css" href="css/styles.css">
+<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+<script src="http://code.highcharts.com/stock/js/highstock.src.js"></script>
+<script src="./js/annotations.js"></script>
+<script src="./js/demo.js"></script>
 </head>
+
 <body>
 
+<div id="main-content">
 <h1>Annotations module</h1>
 
 <p><div class="info">If you're interested in adding new features or modifying existing ones, please contact us: <a href="mailto:start@blacklabel.pl"> start@blacklabel.pl </a><br>
@@ -359,9 +357,8 @@ Selected button prevents from zooming and panning to draw annotation. </td>
 
 
 <h3>Add annotation via buttons</h3>
-<div style="margin: 10px 0px 50px 0px;width: 854px; float: left;">
-		<div id="container" style="float: left; height: 542px; width: 800px">
-		</div>
+<div id="container"></div>
+</div>
 </div>
 </body>
 </html>
