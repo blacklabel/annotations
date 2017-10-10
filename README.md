@@ -1,3 +1,5 @@
+### ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) Annotations are a part of Highstock 6+ and Highcharts 6+ as a module. This plugin was build for older versions of Highstock.
+
 <h1>Annotations module</h1>
 
 <p><div class="info">If you're interested in adding new features or modifying existing ones, please contact us: <a href="mailto:start@blacklabel.pl"> start@blacklabel.pl </a><br>
