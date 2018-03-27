@@ -1,6 +1,6 @@
 {
 	"name": "Annotations",
-	"version": "1.3.2",
+	"version": "1.3.3",
 	"title": "Annotations",
 	"author": {
 		"name": "Black Label",
@@ -21,7 +21,10 @@
 	],
 	"description": "Plugin that add annotations to Highcharts library. Advanced demo is available on the github: http://blacklabel.github.io/annotations/",
 	"keywords": [
-		"annotations"
+		"annotations",
+		"highcharts",
+		"highstock",
+		"highcharts-addon"
 	],       
 	"maintainers": [
 		{
