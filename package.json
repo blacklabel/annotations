@@ -1,6 +1,6 @@
 {
   "name": "highcharts-annotations",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "Highcharts plugin to add dynamic annotations to charts.",
   "main": "js/annotations.js",
   "repository": {
@@ -8,9 +8,10 @@
     "url": "git+https://github.com/blacklabel/annotations.git"
   },
   "keywords": [
+    "annotations",
     "highcharts",
     "highstock",
-    "annotations"
+    "highcharts-addon"
   ],
   "author": "Black Label <start@blacklabel.pl> (http://blacklabel.pl)",
   "license": "SEE LICENSE IN license.txt",
